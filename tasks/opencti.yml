@@ -19,9 +19,9 @@
       when: ansible_distribution == 'Debian'
 
 
-- name: Check that /opt/opencti/opencti6.5.9.finish exists
+- name: Check that .finish exists
   stat:
-    path: /opt/opencti/opencti6.5.9.finish
+    path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
   register: opencti_result
 
 - name: Install OpenCTI
