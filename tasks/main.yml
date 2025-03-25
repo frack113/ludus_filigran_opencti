@@ -1,0 +1,11 @@
+---
+# Install OpenCTI
+# 
+# 
+# Check only Ubuntu 24 and Debian 12
+
+- name: Install OpenCTI
+  ansible.builtin.include_tasks:
+    file: opencti.yml
+  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+
