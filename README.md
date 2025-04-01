@@ -4,10 +4,10 @@ An Ansible Role that installs [OpenCTI](https://docs.opencti.io/latest/) and [Op
 
 ## Requirements
 
-- Linux server
-  - Debian 12
-  - Ubuntu 24 LTS
+- Linux server with docker engine
 - Internet connection
+
+You can use the [geerlingguy.docker](https://galaxy.ansible.com/ui/standalone/roles/geerlingguy/docker/) role to install docker.
 
 ## Role Variables
 
@@ -96,6 +96,7 @@ ludus:
     cpus: 4
     linux: true
     roles:
+      - geerlingguy.docker
       - frack113.ludus_filigran_opencti
 ```
 

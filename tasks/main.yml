@@ -1,11 +1,15 @@
 ---
-# Install OpenCTI
 # 
+# Install OpenCTI And OPneBAS
 # 
-# Check only Ubuntu 24 and Debian 12
+
+- name: Check that .finish exists
+  stat:
+    path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
+  register: opencti_result
 
 - name: Install OpenCTI
   ansible.builtin.include_tasks:
-    file: opencti.yml
-  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+    file: install-opencti.yml
+  when: not opencti_result.stat.exists
 
