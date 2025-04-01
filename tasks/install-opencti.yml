@@ -1,36 +1,5 @@
 ---
 
-- name: Set vm.max_map_count for elasticsearch
-  ansible.posix.sysctl:
-    name: vm.max_map_count
-    value: '1048575'
-    state: present
-
-- name: Create opencti folder
-  ansible.builtin.file:
-    path: /opt/opencti
-    state: directory
-    mode: '0755'
-
-# TODO update to new version
-# stop old docker but keep volume
-
-- name: Copy docker-compose file
-  ansible.builtin.copy:
-    src: "{{item}}"
-    dest: "/opt/opencti/{{item}}"
-  loop:
-    - docker-compose.yml
-    - rabbitmq.conf
-
-- name: Create .env file
-  ansible.builtin.template:
-    src: env.conf.j2
-    dest: /opt/opencti/.env
-
-- name: Pull images
-  community.docker.docker_compose_v2_pull:
-    project_src: /opt/opencti
 
 # Elastic can be very very slow to start
 - name: Start slow depends_on dockers
@@ -104,7 +73,3 @@
     wait: true
     wait_timeout: 120
 
-- name: Touch the .finish file
-  ansible.builtin.file:
-    path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
-    state: touch

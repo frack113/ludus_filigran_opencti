@@ -1,0 +1,56 @@
+---
+- name: Set vm.max_map_count for elasticsearch
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: '1048575'
+    state: present
+
+- name: Create folders
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+     - /opt/backend
+     - /opt/opencti
+     - /opt/openbas
+     - /opt/import-cti
+
+#- name: Check backend docker-compose exists
+#  stat:
+#    path: /opt/backend/docker-compose.yml
+#  register: backend_dockercompose
+#
+#- name: Stop old backend docker
+#  community.docker.docker_compose_v2:
+#    project_src: /opt/backend
+#    state: absent 
+#    wait: true
+#    wait_timeout: 180
+#  when: backend_dockercompose.stat.exists
+#
+#- name: Check opencti docker-compose exists
+#  stat:
+#    path: /opt/opencti/docker-compose.yml
+#  register: opencti_dockercompose
+#
+#- name: Stop old OpenCTI docker
+#  community.docker.docker_compose_v2:
+#    project_src: /opt/opencti 
+#    state: absent 
+#    wait: true
+#    wait_timeout: 180
+#  when: opencti_dockercompose.stat.exists
+#
+#- name: Check openbas docker-compose exists
+#  stat:
+#    path: /opt/openbas/docker-compose.yml
+#  register: openbas_dockercompose
+#
+#- name: Stop old OpenBAS docker
+#  community.docker.docker_compose_v2:
+#    project_src: /opt/openbas 
+#    state: absent 
+#    wait: true
+#    wait_timeout: 180
+#  when: openbas_dockercompose.stat.exists

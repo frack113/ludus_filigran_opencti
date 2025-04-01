@@ -1,0 +1,7 @@
+---
+
+- name: Create pandora data folder
+  ansible.builtin.unarchive:
+    src: import-cti.tgz
+    dest: /opt/import-cti
+
