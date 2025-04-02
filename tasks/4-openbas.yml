@@ -1,6 +1,6 @@
 ---
 
-- name: Copy docker-compose file
+- name: Copy OpenBAS docker-compose file
   ansible.builtin.copy:
     src: openbas-compose.yml
     dest: /opt/openbas/docker-compose.yml
@@ -10,7 +10,7 @@
     src: env.conf.j2
     dest: /opt/openbas/.env
 
-- name: Pull images
+- name: Pull OpenBAS images
   community.docker.docker_compose_v2_pull:
     project_src: /opt/openbas
 

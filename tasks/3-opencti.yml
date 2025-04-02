@@ -1,6 +1,6 @@
 ---
 
-- name: Copy docker-compose file
+- name: Copy OpenCTI docker-compose file
   ansible.builtin.copy:
     src: opencti-compose.yml
     dest: /opt/opencti/docker-compose.yml
@@ -10,7 +10,7 @@
     src: env.conf.j2
     dest: /opt/opencti/.env
 
-- name: Pull images
+- name: Pull OpenCTI images
   community.docker.docker_compose_v2_pull:
     project_src: /opt/opencti
 

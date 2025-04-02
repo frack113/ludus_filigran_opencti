@@ -25,6 +25,10 @@
     - name: Install OpenBAS
       ansible.builtin.include_tasks:
         file: 4-openbas.yml
+
+    - name: Install Connectors
+      ansible.builtin.include_tasks:
+        file: 5-connectors.yml
   
     # - name: Touch the .finish file
     #   ansible.builtin.file:

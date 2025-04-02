@@ -14,7 +14,13 @@
      - /opt/backend
      - /opt/opencti
      - /opt/openbas
-     - /opt/import-cti
+     - /opt/connectors
+
+- name: Create filigran docker lan
+  community.docker.docker_network:
+    name: filigran
+    state: present
+    enable_ipv6: false
 
 #- name: Check backend docker-compose exists
 #  stat:

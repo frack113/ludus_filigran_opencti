@@ -1,6 +1,8 @@
 services:
   openbas:
     image: openbas/platform:${OPENBAS_TAG}
+    networks:
+      - host
     environment:
       # OpenBAS General Configuration
       - SERVER_PORT=8081
@@ -10,15 +12,15 @@ services:
       - OPENBAS_ADMIN_PASSWORD=${OPENBAS_ADMIN_PASSWORD}
       - OPENBAS_ADMIN_TOKEN=${OPENBAS_ADMIN_TOKEN}
       # POSTGRES
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${SERVER_IP}:5432/openbas
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgsql:5432/openbas
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       # MINIO
-      - MINIO_ENDPOINT=${SERVER_IP}
+      - MINIO_ENDPOINT=minio
       - MINIO_ACCESS-KEY=${MINIO_ROOT_USER}
       - MINIO_ACCESS-SECRET=${MINIO_ROOT_PASSWORD}
       # RABBITMQ
-      - OPENBAS_RABBITMQ_HOSTNAME=${SERVER_IP}
+      - OPENBAS_RABBITMQ_HOSTNAME=rabbitmq
       - OPENBAS_RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
       - OPENBAS_RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
       # SPRING MAIL Configurations
@@ -52,3 +54,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+
+networks:
+  host:
+    name: filigran
+    external: true

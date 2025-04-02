@@ -5,7 +5,7 @@
     src: rabbitmq.conf
     dest: /opt/backend/rabbitmq.conf
 
-- name: Copy docker-compose file
+- name: Copy backend docker-compose file
   ansible.builtin.copy:
     src: backend-compose.yml
     dest: /opt/backend/docker-compose.yml

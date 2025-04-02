@@ -1,6 +1,8 @@
 services:
   opencti:
     image: opencti/platform:${OPENCTI_TAG}
+    networks:
+      - host
     environment:
       - NODE_OPTIONS=--max-old-space-size=8096
       - APP__PORT=8080
@@ -9,16 +11,16 @@ services:
       - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
       - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
       - APP__APP_LOGS__LOGS_LEVEL=error
-      - REDIS__HOSTNAME=${SERVER_IP}
+      - REDIS__HOSTNAME=redis
       - REDIS__PORT=6379
-      - ELASTICSEARCH__URL=http://${SERVER_IP}:9200
+      - ELASTICSEARCH__URL=http://elasticsearch:9200
       - ELASTICSEARCH__NUMBER_OF_REPLICAS=0
-      - MINIO__ENDPOINT=/${SERVER_IP}
+      - MINIO__ENDPOINT=minio
       - MINIO__PORT=9000
       - MINIO__USE_SSL=false
       - MINIO__ACCESS_KEY=${MINIO_ROOT_USER}
       - MINIO__SECRET_KEY=${MINIO_ROOT_PASSWORD}
-      - RABBITMQ__HOSTNAME=${SERVER_IP}
+      - RABBITMQ__HOSTNAME=rabbitmq
       - RABBITMQ__PORT=5672
       - RABBITMQ__PORT_MANAGEMENT=15672
       - RABBITMQ__MANAGEMENT_SSL=false
@@ -38,10 +40,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+
   worker:
     image: opencti/worker:${OPENCTI_TAG}
+    networks:
+      - host
     environment:
-      - OPENCTI_URL=http://${SERVER_IP}:8080
+      - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - WORKER_LOG_LEVEL=info
     depends_on:
@@ -51,8 +56,14 @@ services:
       mode: replicated
       replicas: 3
     restart: always
+
 volumes:
   esdata:
   s3data:
   redisdata:
   amqpdata:
+
+networks:
+  host:
+    name: filigran
+    external: true
