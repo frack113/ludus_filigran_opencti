@@ -1,0 +1,76 @@
+---
+
+- name: Create OpenCTI connectors
+  ansible.builtin.unarchive:
+    src: CTI_connectors.tar
+    dest: /opt/CTI_connectors
+
+- name: Create external-import .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/CTI_connectors/external-import/{{ item }}/.env"
+  loop: "{{ ludus_filigran_opencti_external_import }}"
+
+- name: Start external-import docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/CTI_connectors/external-import/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_opencti_external_import }}"
+
+- name: Create internal-enrichment .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/CTI_connectors/internal-enrichment/{{ item }}/.env"
+  loop: "{{ ludus_filigran_opencti_internal_enrichment }}"
+
+- name: Start external-import docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/CTI_connectors/internal-enrichment/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_opencti_internal_enrichment }}"
+
+- name: Create internal-export-file .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/CTI_connectors/internal-export-file/{{ item }}/.env"
+  loop: "{{ ludus_filigran_opencti_internal_export_file }}"
+
+- name: Start internal-export-file docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/CTI_connectors/internal-export-file/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_opencti_internal_export_file }}"
+
+- name: Create internal-import-file .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/CTI_connectors/internal-import-file/{{ item }}/.env"
+  loop: "{{ ludus_filigran_opencti_internal_import_file }}"
+
+- name: Start internal-import-file docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/CTI_connectors/internal-import-file/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_opencti_internal_import_file }}"
+
+- name: Create stream .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/CTI_connectors/stream/{{ item }}/.env"
+  loop: "{{ ludus_filigran_opencti_stream }}"
+
+- name: Start stream docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/CTI_connectors/stream/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_opencti_stream }}"

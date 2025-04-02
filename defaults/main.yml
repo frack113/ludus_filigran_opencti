@@ -50,5 +50,13 @@ ludus_filigran_opencti_OPENBAS_MAIL_IMAP_AUTH: true
 ludus_filigran_opencti_OPENBAS_MAIL_IMAP_SSL_ENABLE: true
 ludus_filigran_opencti_OPENBAS_MAIL_IMAP_STARTTLS_ENABLE: false
 
-# Connectors
-ludus_filigran_opencti_internal-import-file: [import-document,import-file-misp,import-file-stix,import-file-yara] 
+# CTI Connectors use the name of the folder
+ludus_filigran_opencti_external_import: [cisa-known-exploited-vulnerabilities,mitre]
+ludus_filigran_opencti_internal_enrichment: []
+ludus_filigran_opencti_internal_export_file: [export-file-csv,export-file-stix,export-file-txt,export-report-pdf,export-ttps-file-navigator]
+ludus_filigran_opencti_internal_import_file: [import-document,import-file-misp,import-file-stix,import-file-yara]
+ludus_filigran_opencti_stream: []
+
+# BAS Connectors
+ludus_filigran_openbas_collectors: [atomic-red-team,mitre-attack]
+ludus_filigran_openbas_injectors: [http-query,nmap]

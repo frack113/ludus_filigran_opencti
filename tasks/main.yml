@@ -26,14 +26,18 @@
       ansible.builtin.include_tasks:
         file: 4-openbas.yml
 
-    - name: Install Connectors
+    - name: Install OpenCTI addons
       ansible.builtin.include_tasks:
-        file: 5-connectors.yml
+        file: 5-cti-addons.yml
+
+    - name: Install OpenCTI addons
+      ansible.builtin.include_tasks:
+        file: 6-bas-addons.yml
   
-    # - name: Touch the .finish file
-    #   ansible.builtin.file:
-    #     path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
-    #     state: touch
+    - name: Touch the .finish file
+      ansible.builtin.file:
+        path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
+        state: touch
 
   when: not opencti_result.stat.exists
 
