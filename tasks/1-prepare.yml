@@ -1,4 +1,31 @@
 ---
+- name: Get info on docker host and list containers matching the filter
+  community.docker.docker_host_info:
+    containers: true
+  register: result_containers
+
+# get only errors with community.docker.docker_container :(
+- name: Stop all running OpenBAS docker
+  ansible.builtin.shell: docker stop {{ item.Id }}
+  loop: "{{ result_containers.containers }}"
+  when: item.Image is match("openbas.*")
+
+- name: Stop all running OpenCTI docker
+  ansible.builtin.shell: docker stop {{ item.Id }}
+  loop: "{{ result_containers.containers }}"
+  when: item.Image is match("opencti.*")
+
+- name: Stop all running Backend docker
+  ansible.builtin.shell: docker stop {{ item.Id }}
+  loop: "{{ result_containers.containers }}"
+  when: item.Names[0] is match(".*backend-.*")
+
+- name: Create filigran docker lan
+  community.docker.docker_network:
+    name: filigran
+    state: present
+    enable_ipv6: false
+
 - name: Set vm.max_map_count for elasticsearch
   ansible.posix.sysctl:
     name: vm.max_map_count
@@ -17,51 +44,3 @@
      - /opt/CTI_connectors
      - /opt/BAS_collectors
      - /opt/BAS_injectors
-
-- name: Create filigran docker lan
-  community.docker.docker_network:
-    name: filigran
-    state: present
-    enable_ipv6: false
-
-- name: Check openbas docker-compose exists
-  stat:
-    path: /opt/openbas/docker-compose.yml
-  register: openbas_dockercompose
-
-- name: Stop old OpenBAS docker
-  community.docker.docker_compose_v2:
-    project_src: /opt/openbas 
-    state: absent 
-    wait: true
-    wait_timeout: 180
-  when: openbas_dockercompose.stat.exists
-
-- name: Check OpenCTI docker-compose exists
-  stat:
-    path: /opt/opencti/docker-compose.yml
-  register: opencti_dockercompose
-
-- name: Stop old OpenCTI docker
-  community.docker.docker_compose_v2:
-    project_src: /opt/opencti 
-    state: absent 
-    wait: true
-    wait_timeout: 180
-  when: opencti_dockercompose.stat.exists
-
-
-- name: Check backend docker-compose exists
-  stat:
-    path: /opt/backend/docker-compose.yml
-  register: backend_dockercompose
-
-- name: Stop old backend docker
-  community.docker.docker_compose_v2:
-    project_src: /opt/backend
-    state: absent 
-    wait: true
-    wait_timeout: 180
-  when: backend_dockercompose.stat.exists
-
-# Don't stop all the other docker as the server can have many roles

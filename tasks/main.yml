@@ -5,7 +5,7 @@
 
 - name: Check that .finish exists
   stat:
-    path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
+    path: "/opt/opencti_{{ ludus_filigran_opencti_version }}.finish"
   register: opencti_result
 
 - name: install OPpenCTI and OpenBas
@@ -36,7 +36,7 @@
   
     - name: Touch the .finish file
       ansible.builtin.file:
-        path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
+        path: "/opt/opencti_{{ ludus_filigran_opencti_version }}.finish"
         state: touch
 
   when: not opencti_result.stat.exists
