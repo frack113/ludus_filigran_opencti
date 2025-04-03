@@ -1,0 +1,39 @@
+---
+
+- name: Create OpenBAS collectors
+  ansible.builtin.unarchive:
+    src: BAS_collectors.tar
+    dest: /opt/BAS_collectors
+
+- name: Create OpenBAS collectors .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/BAS_collectors/{{ item }}/.env"
+  loop: "{{ ludus_filigran_openbas_collectors }}"
+
+- name: Start OpenBAS collectors docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/BAS_collectors/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_openbas_collectors }}"
+
+- name: Create OpenCTI injectors
+  ansible.builtin.unarchive:
+    src: BAS_injectors.tar
+    dest: /opt/BAS_injectors
+
+- name: Create OpenBAS injectors .env file
+  ansible.builtin.template:
+    src: env.conf.j2
+    dest: "/opt/BAS_injectors/{{ item }}/.env"
+  loop: "{{ ludus_filigran_openbas_injectors }}"
+
+- name: Start OpenBAS injectors docker
+  community.docker.docker_compose_v2:
+    project_src: "/opt/BAS_injectors/{{ item }}/"
+    state: present
+    wait: true
+    wait_timeout: 180
+  loop: "{{ ludus_filigran_openbas_injectors }}"

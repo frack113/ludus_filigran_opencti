@@ -1,0 +1,46 @@
+---
+- name: Get info on docker host and list containers matching the filter
+  community.docker.docker_host_info:
+    containers: true
+  register: result_containers
+
+# get only errors with community.docker.docker_container :(
+- name: Stop all running OpenBAS docker
+  ansible.builtin.shell: docker stop {{ item.Id }}
+  loop: "{{ result_containers.containers }}"
+  when: item.Image is match("openbas.*")
+
+- name: Stop all running OpenCTI docker
+  ansible.builtin.shell: docker stop {{ item.Id }}
+  loop: "{{ result_containers.containers }}"
+  when: item.Image is match("opencti.*")
+
+- name: Stop all running Backend docker
+  ansible.builtin.shell: docker stop {{ item.Id }}
+  loop: "{{ result_containers.containers }}"
+  when: item.Names[0] is match(".*backend-.*")
+
+- name: Create filigran docker lan
+  community.docker.docker_network:
+    name: filigran
+    state: present
+    enable_ipv6: false
+
+- name: Set vm.max_map_count for elasticsearch
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: '1048575'
+    state: present
+
+- name: Create folders
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+     - /opt/backend
+     - /opt/opencti
+     - /opt/openbas
+     - /opt/CTI_connectors
+     - /opt/BAS_collectors
+     - /opt/BAS_injectors

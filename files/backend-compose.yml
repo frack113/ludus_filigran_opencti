@@ -1,0 +1,120 @@
+services:
+  redis:
+    image: redis:${REDIS_TAG}
+    restart: always
+    networks:
+      - host
+    volumes:
+      - redisdata:/data
+    #ports:
+    #  - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_TAG}
+    networks:
+      - host
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+#    ports:
+#      - "9200:9200"
+    environment:
+      # Comment-out the line below for a cluster of multiple nodes
+      - discovery.type=single-node
+      # Uncomment the line below below for a cluster of multiple nodes
+      # - cluster.name=docker-cluster
+      - xpack.ml.enabled=false
+      - xpack.security.enabled=false
+      - thread_pool.search.queue_size=5000
+      - logger.org.elasticsearch.discovery="ERROR"
+      - "ES_JAVA_OPTS=-Xms${ELASTIC_MEMORY_SIZE} -Xmx${ELASTIC_MEMORY_SIZE}"
+    restart: always
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: curl -s http://localhost:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 50
+
+  minio:
+    image: minio/minio:${MINIO_TAG}
+    networks:
+      - host
+    volumes:
+      - s3data:/data
+#    ports:
+#      - "9000:9000"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data
+    restart: always
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:${RABBITMQ_TAG}
+    networks:
+      - host
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_NODENAME=rabbit01@localhost
+    volumes:
+      - type: bind
+        source: rabbitmq.conf
+        target: /etc/rabbitmq/rabbitmq.conf
+      - amqpdata:/var/lib/rabbitmq
+    restart: always
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  pgsql:
+    image: postgres:${POSTGRES_TAG}
+    networks:
+      - host
+#    ports:
+#      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: openbas
+    volumes:
+      - pgsqldata:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "openbas" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  esdata:
+  s3data:
+  redisdata:
+  amqpdata:
+  pgsqldata:
+
+networks:
+  host:
+    name: filigran
+    external: true

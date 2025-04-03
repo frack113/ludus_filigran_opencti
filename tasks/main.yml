@@ -1,15 +1,43 @@
 ---
 # 
-# Install OpenCTI And OPneBAS
+# Install OpenCTI And OpenBAS
 # 
 
 - name: Check that .finish exists
   stat:
-    path: "/opt/opencti/opencti_{{ ludus_filigran_opencti_version }}.finish"
+    path: "/opt/opencti_{{ ludus_filigran_opencti_version }}.finish"
   register: opencti_result
 
-- name: Install OpenCTI
-  ansible.builtin.include_tasks:
-    file: install-opencti.yml
+- name: install OPpenCTI and OpenBas
+  block:
+    - name: Prepare folders
+      ansible.builtin.include_tasks:
+        file: 1-prepare.yml
+
+    - name: Install backend
+      ansible.builtin.include_tasks:
+        file: 2-backend.yml
+
+    - name: Install OpenCTI
+      ansible.builtin.include_tasks:
+        file: 3-opencti.yml
+
+    - name: Install OpenBAS
+      ansible.builtin.include_tasks:
+        file: 4-openbas.yml
+
+    - name: Install OpenCTI addons
+      ansible.builtin.include_tasks:
+        file: 5-cti-addons.yml
+
+    - name: Install OpenCTI addons
+      ansible.builtin.include_tasks:
+        file: 6-bas-addons.yml
+  
+    - name: Touch the .finish file
+      ansible.builtin.file:
+        path: "/opt/opencti_{{ ludus_filigran_opencti_version }}.finish"
+        state: touch
+
   when: not opencti_result.stat.exists
 
