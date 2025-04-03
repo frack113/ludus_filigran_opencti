@@ -14,8 +14,8 @@ You can use the [geerlingguy.docker](https://galaxy.ansible.com/ui/standalone/ro
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
-ludus_filigran_opencti_version: 6.5.9
-ludus_filigran_openbas_version: 1.14.1
+ludus_filigran_opencti_version: 6.5.10
+ludus_filigran_openbas_version: 1.15.0
 
 # OpenCTI General Configuration
 ludus_filigran_opencti_ADMIN_EMAIL: 'admin@opencti.io'
