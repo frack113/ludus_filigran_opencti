@@ -2,11 +2,11 @@
 # Role variables should all be prefaced with the name of the role to avoid
 # name conflicts with other roles
 
-ludus_filigran_opencti_version: 6.5.10
-ludus_filigran_openbas_version: 1.15.0
+ludus_filigran_opencti_version: 6.6.6
+ludus_filigran_openbas_version: 1.15.1
 
 # OpenCTI General Configuration
-ludus_filigran_opencti_ADMIN_EMAIL: 'admin@opencti.io'
+ludus_filigran_opencti_ADMIN_EMAIL: 'admin@domain.com'
 ludus_filigran_opencti_ADMIN_PASSWORD: password
 ludus_filigran_opencti_ADMIN_TOKEN: 9079c861-460e-49ba-9948-54137cfeb8ca
 ludus_filigran_opencti_HEALTHCHECK_ACCESS_KEY: 9813287b-4234-4b9c-8382-73938f640455

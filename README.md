@@ -4,21 +4,19 @@ An Ansible Role that installs [OpenCTI](https://docs.opencti.io/latest/) and [Op
 
 ## Requirements
 
-- Linux server with docker engine
+- Linux server
 - Internet connection
-
-You can use the [geerlingguy.docker](https://galaxy.ansible.com/ui/standalone/roles/geerlingguy/docker/) role to install docker.
 
 ## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
-ludus_filigran_opencti_version: 6.5.10
-ludus_filigran_openbas_version: 1.15.0
+ludus_filigran_opencti_version: 6.6.6
+ludus_filigran_openbas_version: 1.15.1
 
 # OpenCTI General Configuration
-ludus_filigran_opencti_ADMIN_EMAIL: 'admin@opencti.io'
+ludus_filigran_opencti_ADMIN_EMAIL: 'admin@domain.com'
 ludus_filigran_opencti_ADMIN_PASSWORD: password
 ludus_filigran_opencti_ADMIN_TOKEN: 9079c861-460e-49ba-9948-54137cfeb8ca
 ludus_filigran_opencti_HEALTHCHECK_ACCESS_KEY: 9813287b-4234-4b9c-8382-73938f640455
@@ -79,6 +77,7 @@ ludus_filigran_openbas_injectors: [http-query,nmap]
 Ansible :
 
 - community.docker
+- geerlingguy.docker
 
 ## Example Playbook
 
@@ -95,8 +94,10 @@ ludus:
     cpus: 4
     linux: true
     roles:
-      - geerlingguy.docker
       - frack113.ludus_filigran_opencti
+    role_vars:
+      ludus_filigran_opencti_version: 6.6.6
+      ludus_filigran_openbas_version: 1.15.1
 ```
 
 ## License
