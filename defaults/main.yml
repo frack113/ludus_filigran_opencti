@@ -2,8 +2,15 @@
 # Role variables should all be prefaced with the name of the role to avoid
 # name conflicts with other roles
 
-ludus_filigran_opencti_version: 6.6.6
-ludus_filigran_openbas_version: 1.15.1
+# Backend docker
+ludus_filigran_docker_redis: 7.4.2
+ludus_filigran_docker_elastic: 8.17.4
+ludus_filigran_docker_minio: RELEASE.2024-05-28T17-19-04Z
+ludus_filigran_docker_rabbitmq: 4.0-management
+ludus_filigran_docker_postgres: 17-alpine
+
+ludus_filigran_opencti_version: 6.6.10
+ludus_filigran_openbas_version: 1.16.0
 
 # OpenCTI General Configuration
 ludus_filigran_opencti_ADMIN_EMAIL: 'admin@domain.com'
