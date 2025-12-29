@@ -27,13 +27,18 @@
 
 - name: Check that .finish exists
   stat:
-    path: "/opt/opencti.finish"
-  register: opencti_result
+    path: "/opt/filigram.finish"
+  register: filigram_result
 
 - name: install OpenCTI and OpenAEV
   block:
     - name: Install OpenCTI
       ansible.builtin.include_tasks:
         file: filigram.yml
-  when: not opencti_result.stat.exists
+    
+    - name: Touch the .finish file
+      ansible.builtin.file:
+        path: "/opt/filigram.finish"
+        state: touch
+  when: not filigram_result.stat.exists
 
