@@ -27,39 +27,18 @@
 
 - name: Check that .finish exists
   stat:
-    path: "/opt/opencti_{{ ludus_filigran_opencti_version }}.finish"
-  register: opencti_result
+    path: "/opt/filigram.finish"
+  register: filigram_result
 
-- name: install OPpenCTI and OpenBas
+- name: install OpenCTI and OpenAEV
   block:
-    - name: Prepare folders
-      ansible.builtin.include_tasks:
-        file: 1-prepare.yml
-
-    - name: Install backend
-      ansible.builtin.include_tasks:
-        file: 2-backend.yml
-
     - name: Install OpenCTI
       ansible.builtin.include_tasks:
-        file: 3-opencti.yml
-
-    - name: Install OpenBAS
-      ansible.builtin.include_tasks:
-        file: 4-openbas.yml
-
-    - name: Install OpenCTI addons
-      ansible.builtin.include_tasks:
-        file: 5-cti-addons.yml
-
-    - name: Install OpenCTI addons
-      ansible.builtin.include_tasks:
-        file: 6-bas-addons.yml
-  
+        file: filigram.yml
+    
     - name: Touch the .finish file
       ansible.builtin.file:
-        path: "/opt/opencti_{{ ludus_filigran_opencti_version }}.finish"
+        path: "/opt/filigram.finish"
         state: touch
-
-  when: not opencti_result.stat.exists
+  when: not filigram_result.stat.exists
 

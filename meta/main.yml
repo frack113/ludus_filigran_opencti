@@ -17,6 +17,7 @@ galaxy_info:
   galaxy_tags:
     - ludus
     - opencti
+    - openaev
     - purple
 
 collections: [community.docker] # Add any collections needed here
