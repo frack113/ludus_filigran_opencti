@@ -1,6 +1,7 @@
 ---
 # Role variables should all be prefaced with the name of the role to avoid
 # name conflicts with other roles
+ludus_filigran_opencti_ELASTIC_MEMORY_SIZE: 8G
 
 ludus_filigran_opencti_MINIO_ROOT_PASSWORD: ChangeMe
 ludus_filigran_opencti_RABBITMQ_DEFAULT_PASS: chaChangeMengeme
@@ -35,3 +36,8 @@ ludus_filigran_opencti_OPENAEV_HEALTHCHECK_KEY: ChangeMe
 ludus_filigran_opencti_OPENAEV_MAIL_IMAP_ENABLED: false
 
 ludus_filigran_opencti_COLLECTOR_NVD_NIST_CVE_API_KEY: ''
+
+ludus_filigran_opencti_INJECTOR_CALDERA_ENABLE: false
+ludus_filigran_opencti_INJECTOR_CALDERA_URL: http://caldera:8888
+ludus_filigran_opencti_INJECTOR_CALDERA_PUBLIC_URL: http://caldera:8888
+ludus_filigran_opencti_INJECTOR_CALDERA_API_KEY: Qb5-gN6hy2-iFNi2P0dvf_vE6-5zaq59YG4SQZQrpu4

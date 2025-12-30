@@ -3,7 +3,7 @@
 An Ansible Role that installs [OpenCTI](https://docs.opencti.io/latest/) and [OpenBAS](https://docs.openbas.io/latest/) for [LUDUS](https://ludus.cloud/).
 
 
-Use the [XTM Docker Deployment docker](https://github.com/FiligranHQ/xtm-docker)
+Use the [XTM Docker Deployment](https://github.com/FiligranHQ/xtm-docker)
 
 ## Requirements
 

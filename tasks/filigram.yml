@@ -1,10 +1,11 @@
 # tasks/filigram.yml 
 ---
 
-- name: Install required packages (Git)
+- name: Install required packages (wget and curl)
   apt:
     name:
-      - git
+      - wget
+      - curl
     state: present
   when: ansible_os_family == 'Debian'
 
@@ -16,26 +17,19 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 
-- name: Check if Filigran repository already exists
-  stat:
-    path: /opt/filigram/.git
-  register: repo_exists
-
-- name: Clone Filigran XTM Docker repository
-  git:
-    repo: https://github.com/FiligranHQ/xtm-docker.git
-    dest: /opt/filigram
-    version: main 
-    force: "{{ not repo_exists.stat.exists }}"
-  register: git_clone_result
-  failed_when: git_clone_result is changed and git_clone_result is not succeeded
-
 - name: Create .env file from template
   ansible.builtin.template:
     src: files/env.j2
     dest: /opt/filigram/.env
     mode: '0644'
-  when: git_clone_result is succeeded
+
+- name: Copy files from local 'files' directory to /opt/filigram
+  copy:
+    src: "files/"
+    dest: "/opt/filigram/"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
 
 - name: Verify Docker is installed and running
   block:
@@ -56,20 +50,14 @@
         enabled: yes
       when: docker_installed.rc == 0 or ansible_check_mode
 
-- name: Pull Filigran images only if not present
-  community.docker.docker_compose_v2_pull:
-    project_src: /opt/filigram
-  when: git_clone_result is succeeded
-
-- name: Start Filigran docker with proper error handling
+- name: Start Filigran docker
   community.docker.docker_compose_v2:
     project_src: /opt/filigram
     state: present
     wait: true
-    wait_timeout: 180
+    wait_timeout: 240
     pull: missing
   register: compose_result
-  when: git_clone_result is succeeded
 
 - name: Fail if Docker Compose failed to start services
   meta: end_host
@@ -86,4 +74,4 @@
   retries: 24
   delay: 5
   register: uri_output
-  when: git_clone_result is succeeded and compose_result is defined and not compose_result.failed
+  when: compose_result is defined and not compose_result.failed
