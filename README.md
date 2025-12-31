@@ -1,9 +1,11 @@
 # Ansible Role: OpenCTI/OpenBAS Server
 
-An Ansible Role that installs [OpenCTI](https://docs.opencti.io/latest/) and [OpenBAS](https://docs.openbas.io/latest/) for [LUDUS](https://ludus.cloud/).
+An Ansible Role that installs [OpenCTI](https://docs.opencti.io/latest/) and [OpenAEV](https://docs.openaev.io/latest/) for [LUDUS](https://ludus.cloud/).
 
 
 Use the [XTM Docker Deployment](https://github.com/FiligranHQ/xtm-docker)
+
+⚠️ check memory requirements
 
 ## Requirements
 
@@ -15,6 +17,8 @@ Use the [XTM Docker Deployment](https://github.com/FiligranHQ/xtm-docker)
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
+ludus_filigran_opencti_ELASTIC_MEMORY_SIZE: 2G
+
 ludus_filigran_opencti_MINIO_ROOT_PASSWORD: ChangeMe
 ludus_filigran_opencti_RABBITMQ_DEFAULT_PASS: ChangeMe
 ludus_filigran_opencti_POSTGRES_PASSWORD: ChangeMe
@@ -38,8 +42,8 @@ ludus_filigran_opencti_IMAP_STARTTLS_ENABLE: false
 
 ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@opencti.io'
 ludus_filigran_opencti_OPENCTI_ADMIN_PASSWORD: ChangeMe
-ludus_filigran_opencti_OPENCTI_ADMIN_TOKEN: '3f752a3b-b4b6-44d0-bb80-ff3807469164'
-ludus_filigran_opencti_OPENCTI_HEALTHCHECK_ACCESS_KEY: ChangeMe
+ludus_filigran_opencti_OPENCTI_ADMIN_TOKEN: 3f752a3b-b4b6-44d0-bb80-ff3807469164
+ludus_filigran_opencti_OPENCTI_HEALTHCHECK_ACCESS_KEY: 1b7f65f9-65c9-4391-93e0-5a92a4852c20
 
 ludus_filigran_opencti_PENAEV_ADMIN_EMAIL: 'ChangeMe@domain.com'
 ludus_filigran_opencti_OPENAEV_ADMIN_PASSWORD: ChangeMe
@@ -68,7 +72,7 @@ ludus:
     template: ubuntu-24.04-x64-server-template
     vlan: 99
     ip_last_octet: 2
-    ram_gb: 12
+    ram_gb: 16
     cpus: 4
     linux: true
     roles:
@@ -76,6 +80,40 @@ ludus:
     role_vars:
       ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@ludus.io'
       ludus_filigran_opencti_PENAEV_ADMIN_EMAIL: 'admin@ludus.io'
+```
+
+## Example Ludus Range Config with caldera
+
+```yaml
+ludus:
+  - vm_name: "{{ range_id }}-Caldera"
+    hostname: "{{ range_id }}-Caldera"
+    template: debian-12-x64-server-template
+    vlan: 50
+    ip_last_octet: 2
+    ram_gb: 4
+    cpus: 2
+    linux: true
+    roles:
+      - frack113.ludus_caldera_server
+    role_vars:
+      ludus_caldera_admin_pwd: 'password'
+
+  - vm_name: "{{ range_id }}-Filigram"
+    hostname: "{{ range_id }}-Filigram"
+    template: debian-12-x64-server-template
+    vlan: 50
+    ip_last_octet: 1
+    ram_gb: 16
+    cpus: 6
+    linux: true
+    roles:
+      - ludus_filigran_opencti
+    role_vars:
+      ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@ludus.io'
+      ludus_filigran_opencti_PENAEV_ADMIN_EMAIL: 'admin@ludus.io'
+      ludus_filigran_opencti_INJECTOR_CALDERA_ENABLE: true
+      ludus_filigran_opencti_INJECTOR_CALDERA_URL: http://10.2.50.2:8888
 ```
 
 ## License

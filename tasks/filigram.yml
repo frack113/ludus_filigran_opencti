@@ -50,6 +50,11 @@
         enabled: yes
       when: docker_installed.rc == 0 or ansible_check_mode
 
+- name: Pull Filigran images only if not present
+  community.docker.docker_compose_v2_pull:
+    project_src: /opt/filigram
+    policy: missing
+
 - name: Start Filigran docker
   community.docker.docker_compose_v2:
     project_src: /opt/filigram
