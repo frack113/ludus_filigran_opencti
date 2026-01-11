@@ -1,5 +1,4 @@
 services:
-
   ###########################
   # DEPENDENCIES            #
   ###########################
@@ -10,7 +9,11 @@ services:
     volumes:
       - rsakeys:/keys
     entrypoint: ["/bin/ash"]
-    command: ["-c", "if [ ! -f /keys/private_key.pem ]; then openssl genpkey -algorithm RSA -out /keys/private_key.pem -pkeyopt rsa_keygen_bits:4096; fi && tail -f /dev/null"]
+    command:
+      [
+        "-c",
+        "if [ ! -f /keys/private_key.pem ]; then openssl genpkey -algorithm RSA -out /keys/private_key.pem -pkeyopt rsa_keygen_bits:4096; fi && tail -f /dev/null",
+      ]
     healthcheck:
       test: ["CMD", "test", "-f", "/keys/private_key.pem"]
       interval: 10s
@@ -54,7 +57,11 @@ services:
         soft: 65536
         hard: 65536
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://elasticsearch:9200/_cluster/health?wait_for_status=yellow >/dev/null || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://elasticsearch:9200/_cluster/health?wait_for_status=yellow >/dev/null || exit 1",
+        ]
       interval: 5s
       timeout: 3s
       retries: 50
@@ -68,10 +75,10 @@ services:
       - pgsqldata:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "openaev" ]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "openaev"]
       interval: 10s
       timeout: 5s
-      retries: 5      
+      retries: 5
   minio:
     image: minio/minio:RELEASE.2025-06-13T11-33-47Z
     volumes:
@@ -80,7 +87,7 @@ services:
       - "9000:9000"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}    
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data
     restart: always
     healthcheck:
@@ -96,11 +103,11 @@ services:
       - RABBITMQ_NODENAME=rabbit01@localhost
     ports:
       - "5672:5672"
-      - "15672:15672"      
+      - "15672:15672"
     volumes:
       - type: bind
         source: ./rabbitmq.conf
-        target: /etc/rabbitmq/rabbitmq.conf 
+        target: /etc/rabbitmq/rabbitmq.conf
       - amqpdata:/var/lib/rabbitmq
     restart: always
     healthcheck:
@@ -127,12 +134,12 @@ services:
       - OPENCTI__DAEMON__DOCKER__NETWORK_MODE=${COMPOSE_PROJECT_NAME}_default
       - OPENAEV__ENABLE=true
       - OPENAEV__URL=http://openaev:8080
-      - OPENAEV__TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - OPENAEV__TOKEN=${OPENAEV_ADMIN_TOKEN}
       - OPENAEV__DAEMON__SELECTOR=docker
       - OPENAEV__DAEMON__DOCKER__NETWORK_MODE=${COMPOSE_PROJECT_NAME}_default
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - rsakeys:/keys:ro  # RSA key mounted as read-only
+      - rsakeys:/keys:ro
     depends_on:
       rsa-key-generator:
         condition: service_healthy
@@ -192,7 +199,13 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test:  ["CMD", "wget", "-qO-", "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -218,7 +231,7 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_STIX_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_STIX_ID}
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
       - CONNECTOR_NAME=ExportFileStix2
       - CONNECTOR_SCOPE=application/json
@@ -231,7 +244,7 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_CSV_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_CSV_ID}
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
       - CONNECTOR_NAME=ExportFileCsv
       - CONNECTOR_SCOPE=text/csv
@@ -244,7 +257,7 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_TXT_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_EXPORT_FILE_TXT_ID}
       - CONNECTOR_TYPE=INTERNAL_EXPORT_FILE
       - CONNECTOR_NAME=ExportFileTxt
       - CONNECTOR_SCOPE=text/plain
@@ -257,12 +270,12 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_STIX_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_STIX_ID}
       - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
       - CONNECTOR_NAME=ImportFileStix
-      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true
       - CONNECTOR_SCOPE=application/json,text/xml
-      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
+      - CONNECTOR_AUTO=true
     restart: always
     depends_on:
       opencti:
@@ -272,13 +285,13 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_IMPORT_DOCUMENT_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_IMPORT_DOCUMENT_ID}
       - CONNECTOR_TYPE=INTERNAL_IMPORT_FILE
       - CONNECTOR_NAME=ImportDocument
-      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true
       - CONNECTOR_SCOPE=application/pdf,text/plain,text/html
-      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
-      - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
+      - CONNECTOR_AUTO=true
+      - CONNECTOR_ONLY_CONTEXTUAL=false
       - IMPORT_DOCUMENT_CREATE_INDICATOR=true
     restart: always
     depends_on:
@@ -289,11 +302,11 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_YARA_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_IMPORT_FILE_YARA_ID}
       - CONNECTOR_NAME=ImportFileYARA
-      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true # Validate any bundle before import
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=true
       - CONNECTOR_SCOPE=text/yara+plain
-      - CONNECTOR_AUTO=false # Enable/disable auto-import of file
+      - CONNECTOR_AUTO=false
       - YARA_IMPORT_FILE_SPLIT_RULES=true
     restart: always
     depends_on:
@@ -304,13 +317,13 @@ services:
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
-      - CONNECTOR_ID=${CONNECTOR_ANALYSIS_ID} # Valid UUIDv4
+      - CONNECTOR_ID=${CONNECTOR_ANALYSIS_ID}
       - CONNECTOR_TYPE=INTERNAL_ANALYSIS
       - CONNECTOR_NAME=ImportDocumentAnalysis
-      - CONNECTOR_VALIDATE_BEFORE_IMPORT=false # Validate any bundle before import
+      - CONNECTOR_VALIDATE_BEFORE_IMPORT=false
       - CONNECTOR_SCOPE=application/pdf,text/plain,text/html
-      - CONNECTOR_AUTO=true # Enable/disable auto-import of file
-      - CONNECTOR_ONLY_CONTEXTUAL=false # Only extract data related to an entity (a report, a threat actor, etc.)
+      - CONNECTOR_AUTO=true
+      - CONNECTOR_ONLY_CONTEXTUAL=false
     restart: always
     depends_on:
       opencti:
@@ -325,7 +338,7 @@ services:
     restart: always
     depends_on:
       opencti:
-        condition: service_healthy          
+        condition: service_healthy
 
   ###########################
   # OPENCTI DEFAULT DATA    #
@@ -344,7 +357,7 @@ services:
     restart: always
     depends_on:
       opencti:
-        condition: service_healthy      
+        condition: service_healthy
   connector-mitre:
     image: opencti/connector-mitre:latest
     environment:
@@ -352,11 +365,11 @@ services:
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
       - CONNECTOR_ID=${CONNECTOR_MITRE_ID}
       - CONNECTOR_AUTO_CREATE_SERVICE_ACCOUNT=true
-      - CONNECTOR_AUTO_CREATE_SERVICE_ACCOUNT_CONFIDENCE_LEVEL=75      
+      - CONNECTOR_AUTO_CREATE_SERVICE_ACCOUNT_CONFIDENCE_LEVEL=75
     restart: always
     depends_on:
       opencti:
-        condition: service_healthy    
+        condition: service_healthy
 
   ###########################
   # OPENAEV                 #
@@ -370,7 +383,7 @@ services:
       - OPENAEV_ADMIN_EMAIL=${OPENAEV_ADMIN_EMAIL}
       - OPENAEV_ADMIN_PASSWORD=${OPENAEV_ADMIN_PASSWORD}
       - OPENAEV_ADMIN_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - OPENAEV_HEALTHCHECK_KEY=${OPENAEV_HEALTHCHECK_KEY:-ChangeMe}
+      - OPENAEV_HEALTHCHECK_KEY=${OPENAEV_HEALTHCHECK_KEY}
       - OPENAEV_EXTRA-TRUSTED-CERTS-DIR=/opt/openaev/additional_certs
       - SPRING_DATASOURCE_URL=jdbc:postgresql://pgsql:5432/openaev
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
@@ -411,7 +424,7 @@ services:
       - INJECTOR_CALDERA_PUBLIC_URL=${INJECTOR_CALDERA_PUBLIC_URL}
       - INJECTOR_CALDERA_API_KEY=${INJECTOR_CALDERA_API_KEY}
     ports:
-      - "8081:8080" # If you change the host port (the left one) do not forget to update OPENAEV_BASE-URL in you .env
+      - "8081:8080"
     depends_on:
       pgsql:
         condition: service_healthy
@@ -423,7 +436,13 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: [ "CMD", "wget", "-qO-", "http://openaev:8080/api/health?health_access_key=${OPENAEV_HEALTHCHECK_KEY}" ]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://openaev:8080/api/health?health_access_key=${OPENAEV_HEALTHCHECK_KEY}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -437,7 +456,7 @@ services:
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - COLLECTOR_ID=${COLLECTOR_MITRE_ATTACK_ID} # Valid UUIDv4
+      - COLLECTOR_ID=${COLLECTOR_MITRE_ATTACK_ID}
       - "COLLECTOR_NAME=MITRE ATT&CK"
     depends_on:
       openaev:
@@ -448,7 +467,7 @@ services:
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - COLLECTOR_ID=${COLLECTOR_OPENAEV_ID} # Valid UUIDv4
+      - COLLECTOR_ID=${COLLECTOR_OPENAEV_ID}
       - "COLLECTOR_NAME=OpenAEV Datasets"
     depends_on:
       openaev:
@@ -459,7 +478,7 @@ services:
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - COLLECTOR_ID=${COLLECTOR_ATOMIC_RED_TEAM_ID} # Valid UUIDv4
+      - COLLECTOR_ID=${COLLECTOR_ATOMIC_RED_TEAM_ID}
       - "COLLECTOR_NAME=Atomic Red Team"
     depends_on:
       openaev:
@@ -470,7 +489,7 @@ services:
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - COLLECTOR_ID=${COLLECTOR_NVD_NIST_CVE_ID} # Valid UUIDv4
+      - COLLECTOR_ID=${COLLECTOR_NVD_NIST_CVE_ID}
       - NVD_NIST_CVE_API_KEY=${COLLECTOR_NVD_NIST_CVE_API_KEY}
       - "COLLECTOR_NAME=CVE by NVD NIST"
     depends_on:
@@ -481,13 +500,13 @@ services:
   ###########################
   # OPENAEV INJECTORS       #
   ###########################
-      
+
   injector-nmap:
     image: openaev/injector-nmap:latest
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - INJECTOR_ID=${INJECTOR_NMAP_ID} # Valid UUIDv4
+      - INJECTOR_ID=${INJECTOR_NMAP_ID}
       - "INJECTOR_NAME=Nmap"
     depends_on:
       openaev:
@@ -498,7 +517,7 @@ services:
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
-      - INJECTOR_ID=${INJECTOR_NUCLEI_ID} # Valid UUIDv4
+      - INJECTOR_ID=${INJECTOR_NUCLEI_ID}
       - "INJECTOR_NAME=Nuclei"
     depends_on:
       openaev:

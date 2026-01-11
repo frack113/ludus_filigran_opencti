@@ -50,10 +50,45 @@
         enabled: yes
       when: docker_installed.rc == 0 or ansible_check_mode
 
-- name: Pull Filigran images only if not present
-  community.docker.docker_compose_v2_pull:
-    project_src: /opt/filigram
-    policy: missing
+
+# Define the list of images to pull (customize as needed)
+- name: Set list of Filigran images
+  set_fact:
+    filigran_images:
+      - alpine/openssl:3.5.4
+      - redis:8.4.0
+      - docker.elastic.co/elasticsearch/elasticsearch:8.19.8
+      - postgres:17-alpine
+      - minio/minio:RELEASE.2025-06-13T11-33-47Z
+      - rabbitmq:4.2-management
+      - filigran/xtm-composer:latest
+      - opencti/platform:latest
+      - opencti/worker:latest
+      - opencti/connector-export-file-stix:latest
+      - opencti/connector-export-file-csv:latest
+      - opencti/connector-export-file-txt:latest
+      - opencti/connector-import-file-stix:latest
+      - opencti/connector-import-document:latest
+      - opencti/connector-import-file-yara:latest
+      - opencti/connector-import-external-reference:latest
+      - opencti/connector-opencti:latest
+      - opencti/connector-mitre:latest
+      - openaev/platform:latest
+      - openaev/collector-mitre-attack:2.0.6
+      - openaev/collector-openaev:latest
+      - openaev/collector-atomic-red-team:latest
+      - openaev/collector-nvd-nist-cve:latest
+      - openaev/injector-nmap:latest
+      - openaev/injector-nuclei:latest
+
+- name: Pull Filigran images individually (max 2 at a time)
+  community.docker.docker_image:
+    name: "{{ item }}"
+    source: pull
+  loop: "{{ filigran_images }}"
+  throttle: 2
+  ignore_errors: yes
+  ignore_errors: yes
 
 - name: Start Filigran docker
   community.docker.docker_compose_v2:
