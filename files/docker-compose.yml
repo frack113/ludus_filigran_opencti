@@ -5,7 +5,7 @@ services:
 
   # Generate RSA key for xtm-composer (PKCS#8 format)
   rsa-key-generator:
-    image: alpine/openssl:3.5.4
+    image: alpine/openssl:${OPENSSL}
     volumes:
       - rsakeys:/keys
     entrypoint: ["/bin/ash"]
@@ -21,7 +21,7 @@ services:
       retries: 3
     restart: always
   redis:
-    image: redis:8.4.0
+    image: redis:${REDIS}
     restart: always
     ports:
       - "6379:6379"
@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 3
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.8
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC}
     volumes:
       - esdata:/usr/share/elasticsearch/data
     environment:
@@ -66,7 +66,7 @@ services:
       timeout: 3s
       retries: 50
   pgsql:
-    image: postgres:17-alpine
+    image: postgres:${POSTGRES}
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -80,7 +80,7 @@ services:
       timeout: 5s
       retries: 5
   minio:
-    image: minio/minio:RELEASE.2025-06-13T11-33-47Z
+    image: minio/minio:${MINIO}
     volumes:
       - s3data:/data
     ports:
@@ -96,7 +96,7 @@ services:
       timeout: 5s
       retries: 3
   rabbitmq:
-    image: rabbitmq:4.2-management
+    image: rabbitmq:${RABBITMQ}
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
@@ -121,7 +121,7 @@ services:
   ###########################
 
   xtm-composer:
-    image: filigran/xtm-composer:latest
+    image: filigran/xtm-composer:${XTM}
     platform: linux/amd64
     environment:
       - MANAGER__ID=${XTM_COMPOSER_ID}
@@ -154,7 +154,7 @@ services:
   ###########################
 
   opencti:
-    image: opencti/platform:latest
+    image: opencti/platform:${OPENCTI}
     environment:
       - NODE_OPTIONS=--max-old-space-size=8096
       - APP__PORT=8080
@@ -210,7 +210,7 @@ services:
       timeout: 5s
       retries: 20
   worker:
-    image: opencti/worker:latest
+    image: opencti/worker:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -227,7 +227,7 @@ services:
   ###########################
 
   connector-export-file-stix:
-    image: opencti/connector-export-file-stix:latest
+    image: opencti/connector-export-file-stix:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -240,7 +240,7 @@ services:
       opencti:
         condition: service_healthy
   connector-export-file-csv:
-    image: opencti/connector-export-file-csv:latest
+    image: opencti/connector-export-file-csv:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -253,7 +253,7 @@ services:
       opencti:
         condition: service_healthy
   connector-export-file-txt:
-    image: opencti/connector-export-file-txt:latest
+    image: opencti/connector-export-file-txt:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -266,7 +266,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-file-stix:
-    image: opencti/connector-import-file-stix:latest
+    image: opencti/connector-import-file-stix:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -281,7 +281,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-document:
-    image: opencti/connector-import-document:latest
+    image: opencti/connector-import-document:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -298,7 +298,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-file-yara:
-    image: opencti/connector-import-file-yara:latest
+    image: opencti/connector-import-file-yara:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -313,7 +313,7 @@ services:
       opencti:
         condition: service_healthy
   connector-analysis:
-    image: opencti/connector-import-document:latest
+    image: opencti/connector-import-document:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -329,7 +329,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-external-reference:
-    image: opencti/connector-import-external-reference:latest
+    image: opencti/connector-import-external-reference:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -345,7 +345,7 @@ services:
   ###########################
 
   connector-opencti:
-    image: opencti/connector-opencti:latest
+    image: opencti/connector-opencti:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -359,7 +359,7 @@ services:
       opencti:
         condition: service_healthy
   connector-mitre:
-    image: opencti/connector-mitre:latest
+    image: opencti/connector-mitre:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -376,7 +376,7 @@ services:
   ###########################
 
   openaev:
-    image: openaev/platform:latest
+    image: openaev/platform:${OPENAEV}
     environment:
       - OPENAEV_BASE-URL=${OPENAEV_EXTERNAL_SCHEME}://${OPENAEV_HOST}:${OPENAEV_PORT}
       - OPENAEV_AUTH-LOCAL-ENABLE=true
@@ -413,7 +413,7 @@ services:
       - OPENAEV_MAIL_IMAP_SSL_TRUST=*
       - OPENAEV_MAIL_IMAP_STARTTLS_ENABLE=${IMAP_STARTTLS_ENABLE}
       # OpenCTI
-      - OPENAEV_XTM_OPENCTI_ENABLE=false
+      - OPENAEV_XTM_OPENCTI_ENABLE=true
       - OPENAEV_XTM_OPENCTI_URL=${OPENCTI_EXTERNAL_SCHEME}://${OPENCTI_HOST}:${OPENCTI_PORT}
       - OPENAEV_XTM_OPENCTI_API_URL=http://opencti:8080
       - OPENAEV_XTM_OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -452,7 +452,7 @@ services:
   ###########################
 
   collector-mitre-attack:
-    image: openaev/collector-mitre-attack:2.0.6
+    image: openaev/collector-mitre-attack:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -463,7 +463,7 @@ services:
         condition: service_healthy
     restart: always
   collector-openaev:
-    image: openaev/collector-openaev:latest
+    image: openaev/collector-openaev:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -474,7 +474,7 @@ services:
         condition: service_healthy
     restart: always
   collector-atomic-red-team:
-    image: openaev/collector-atomic-red-team:latest
+    image: openaev/collector-atomic-red-team:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -485,7 +485,7 @@ services:
         condition: service_healthy
     restart: always
   collector-nvd-nist-cve:
-    image: openaev/collector-nvd-nist-cve:latest
+    image: openaev/collector-nvd-nist-cve:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -502,7 +502,7 @@ services:
   ###########################
 
   injector-nmap:
-    image: openaev/injector-nmap:latest
+    image: openaev/injector-nmap:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -513,7 +513,7 @@ services:
         condition: service_healthy
     restart: always
   injector-nuclei:
-    image: openaev/injector-nuclei:latest
+    image: openaev/injector-nuclei:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
