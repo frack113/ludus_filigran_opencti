@@ -602,11 +602,11 @@ services:
         condition: service_healthy
     restart: always
 
-  volumes:
-    esdata:
-    pgsqldata:
-    s3data:
-    redisdata:
-    amqpdata:
-    rsakeys:
-    pgsqlxtmonedata:
+volumes:
+  esdata:
+  pgsqldata:
+  s3data:
+  redisdata:
+  amqpdata:
+  rsakeys:
+  pgsqlxtmonedata:

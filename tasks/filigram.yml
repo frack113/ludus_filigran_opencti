@@ -60,6 +60,9 @@
       - openaev/collector-nvd-nist-cve:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
       - openaev/injector-nmap:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
       - openaev/injector-nuclei:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - pgvector/pgvector:pg17
+      - xtmone/platform:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
+      - xtmone/worker:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
 
 - name: Pull Filigran images individually (max 2 at a time)
   community.docker.docker_image:
