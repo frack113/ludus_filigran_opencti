@@ -17,15 +17,16 @@ Use the [XTM Docker Deployment](https://github.com/FiligranHQ/xtm-docker)
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
-ludus_filigran_opencti_DOCKER_OPENCTI: 6.9.6
-ludus_filigran_opencti_DOCKER_OPENAEV: 2.0.11
-ludus_filigran_opencti_DOCKER_XTM: 1.0.2
+ludus_filigran_opencti_DOCKER_OPENCTI: 7.260710.0
+ludus_filigran_opencti_DOCKER_OPENAEV: 2.260710.0
+ludus_filigran_opencti_DOCKER_XTM: 3.260707.0
+ludus_filigran_opencti_DOCKER_XTM_ONE: 1.260712.0
 ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.4
-ludus_filigran_opencti_DOCKER_REDIS: 8.4.0
-ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.8
+ludus_filigran_opencti_DOCKER_REDIS: 8.8.0
+ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.16
 ludus_filigran_opencti_DOCKER_POSTGRES: 17-alpine
 ludus_filigran_opencti_DOCKER_MINIO: RELEASE.2025-06-13T11-33-47Z
-ludus_filigran_opencti_DOCKER_RABBITMQ: 4.2-management
+ludus_filigran_opencti_DOCKER_RABBITMQ: 4.3-management
 
 ludus_filigran_opencti_INSTALL_DIR: /opt/filigram
 
@@ -130,7 +131,7 @@ ludus:
     cpus: 6
     linux: true
     roles:
-      - ludus_filigran_opencti
+      - frack113.ludus_filigran_opencti
     role_vars:
       ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@ludus.io'
       ludus_filigran_opencti_OPENAEV_ADMIN_EMAIL: 'admin@ludus.io'
