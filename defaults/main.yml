@@ -10,8 +10,11 @@ ludus_filigran_opencti_DOCKER_OPENCTI: 6.9.6
 ludus_filigran_opencti_DOCKER_OPENAEV: 2.0.11
 ludus_filigran_opencti_DOCKER_XTM: 1.0.2
 
+ludus_filigran_opencti_INSTALL_DIR: /opt/filigram
+
 ludus_filigran_opencti_ELASTIC_MEMORY_SIZE: 4G
 
+ludus_filigran_opencti_MINIO_ROOT_USER: f6d78d20-00d4-404a-940f-dd6d2971619e
 ludus_filigran_opencti_MINIO_ROOT_PASSWORD: d8b68174-f25e-4f42-af24-a902c62cb241
 ludus_filigran_opencti_RABBITMQ_DEFAULT_PASS: guest
 ludus_filigran_opencti_POSTGRES_PASSWORD: ChangeMe
