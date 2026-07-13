@@ -17,8 +17,21 @@ Use the [XTM Docker Deployment](https://github.com/FiligranHQ/xtm-docker)
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
+ludus_filigran_opencti_DOCKER_OPENCTI: 6.9.6
+ludus_filigran_opencti_DOCKER_OPENAEV: 2.0.11
+ludus_filigran_opencti_DOCKER_XTM: 1.0.2
+ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.4
+ludus_filigran_opencti_DOCKER_REDIS: 8.4.0
+ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.8
+ludus_filigran_opencti_DOCKER_POSTGRES: 17-alpine
+ludus_filigran_opencti_DOCKER_MINIO: RELEASE.2025-06-13T11-33-47Z
+ludus_filigran_opencti_DOCKER_RABBITMQ: 4.2-management
+
+ludus_filigran_opencti_INSTALL_DIR: /opt/filigram
+
 ludus_filigran_opencti_ELASTIC_MEMORY_SIZE: 4G
 
+ludus_filigran_opencti_MINIO_ROOT_USER: f6d78d20-00d4-404a-940f-dd6d2971619e
 ludus_filigran_opencti_MINIO_ROOT_PASSWORD: d8b68174-f25e-4f42-af24-a902c62cb241
 ludus_filigran_opencti_RABBITMQ_DEFAULT_PASS: guest
 ludus_filigran_opencti_POSTGRES_PASSWORD: ChangeMe
@@ -44,12 +57,16 @@ ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@opencti.io'
 ludus_filigran_opencti_OPENCTI_ADMIN_PASSWORD: ChangeMePlease
 ludus_filigran_opencti_OPENCTI_ADMIN_TOKEN: 3f752a3b-b4b6-44d0-bb80-ff3807469164
 ludus_filigran_opencti_OPENCTI_HEALTHCHECK_ACCESS_KEY: 1b7f65f9-65c9-4391-93e0-5a92a4852c20
+ludus_filigran_opencti_OPENCTI_ENCRYPTION_KEY: ChangeMeWithGeneratedBase64Key
 
 ludus_filigran_opencti_OPENAEV_ADMIN_EMAIL: 'admin@opencti.io'
 ludus_filigran_opencti_OPENAEV_ADMIN_PASSWORD: ChangeMePlease
 ludus_filigran_opencti_OPENAEV_ADMIN_TOKEN: 3f4dc0cf-eff8-4f6a-aec7-07e6566931ef
 ludus_filigran_opencti_OPENAEV_HEALTHCHECK_KEY: 1b7f65f9-65c9-4391-93e0-5a92a4852c20
 ludus_filigran_opencti_OPENAEV_MAIL_IMAP_ENABLED: false
+ludus_filigran_opencti_OPENAEV_ADMIN_ENCRYPTION_KEY: ChangeMeWithGeneratedBase64Key
+ludus_filigran_opencti_OPENAEV_ADMIN_ENCRYPTION_SALT: ChangeMeWithMin8Chars
+ludus_filigran_opencti_OPENAEV_WITH_PROXY: false
 
 ludus_filigran_opencti_COLLECTOR_NVD_NIST_CVE_API_KEY: ''
 
@@ -84,7 +101,7 @@ ludus:
       - frack113.ludus_filigran_opencti
     role_vars:
       ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@ludus.io'
-      ludus_filigran_opencti_PENAEV_ADMIN_EMAIL: 'admin@ludus.io'
+      ludus_filigran_opencti_OPENAEV_ADMIN_EMAIL: 'admin@ludus.io'
 ```
 
 ## Example Ludus Range Config with caldera
@@ -116,7 +133,7 @@ ludus:
       - ludus_filigran_opencti
     role_vars:
       ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@ludus.io'
-      ludus_filigran_opencti_PENAEV_ADMIN_EMAIL: 'admin@ludus.io'
+      ludus_filigran_opencti_OPENAEV_ADMIN_EMAIL: 'admin@ludus.io'
       ludus_filigran_opencti_INJECTOR_CALDERA_ENABLE: true
       ludus_filigran_opencti_INJECTOR_CALDERA_URL: http://10.2.50.2:8888
 ```
