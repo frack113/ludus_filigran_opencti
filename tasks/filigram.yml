@@ -9,9 +9,9 @@
     state: present
   when: ansible_os_family == 'Debian'
 
-- name: Create /opt/filigram directory if it doesn't exist
+- name: Create installation directory if it doesn't exist
   file:
-    path: /opt/filigram
+    path: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
     state: directory
     mode: '0755'
     owner: "{{ ansible_user }}"
@@ -20,36 +20,16 @@
 - name: Create .env file from template
   ansible.builtin.template:
     src: files/env.j2
-    dest: /opt/filigram/.env
+    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/.env"
     mode: '0644'
 
-- name: Copy files from local 'files' directory to /opt/filigram
+- name: Copy files from local 'files' directory to installation directory
   copy:
     src: "files/"
-    dest: "/opt/filigram/"
+    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0644'
-
-- name: Verify Docker is installed and running
-  block:
-    - name: Check if Docker is installed
-      command: docker --version
-      register: docker_installed
-      changed_when: false
-      ignore_errors: yes
-
-    - name: Fail if Docker is not installed (except in check mode)
-      meta: end_host
-      when: docker_installed.rc != 0 and not ansible_check_mode
-
-    - name: Ensure Docker is running
-      service:
-        name: docker
-        state: started
-        enabled: yes
-      when: docker_installed.rc == 0 or ansible_check_mode
-
 
 # Define the list of images to pull (customize as needed)
 - name: Set list of Filigran images
@@ -80,6 +60,9 @@
       - openaev/collector-nvd-nist-cve:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
       - openaev/injector-nmap:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
       - openaev/injector-nuclei:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - pgvector/pgvector:pg17
+      - xtmone/platform:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
+      - xtmone/worker:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
 
 - name: Pull Filigran images individually (max 2 at a time)
   community.docker.docker_image:
@@ -88,10 +71,19 @@
   loop: "{{ filigran_images }}"
   throttle: 2
   ignore_errors: yes
+  register: pull_results
+
+- name: Warning about failed image pulls
+  debug:
+    msg: "WARNING: Failed to pull image {{ item.item }}"
+  loop: "{{ pull_results.results }}"
+  when: item.failed
+  loop_control:
+    label: "{{ item.item }}"
 
 - name: Start Filigran docker
   community.docker.docker_compose_v2:
-    project_src: /opt/filigram
+    project_src: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
     state: present
     wait: true
     wait_timeout: 240
