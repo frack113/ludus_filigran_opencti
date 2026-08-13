@@ -1,15 +1,15 @@
 ---
-ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.4
-ludus_filigran_opencti_DOCKER_REDIS: 8.8.0
-ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.16
+ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.7
+ludus_filigran_opencti_DOCKER_REDIS: 8.8.1
+ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.20
 ludus_filigran_opencti_DOCKER_POSTGRES: 17-alpine
 ludus_filigran_opencti_DOCKER_MINIO: RELEASE.2025-06-13T11-33-47Z
 ludus_filigran_opencti_DOCKER_RABBITMQ: 4.3-management
 
-ludus_filigran_opencti_DOCKER_OPENCTI: 7.260710.0
-ludus_filigran_opencti_DOCKER_OPENAEV: 2.260710.0
-ludus_filigran_opencti_DOCKER_XTM: 3.260707.0
-ludus_filigran_opencti_DOCKER_XTM_ONE: 1.260712.0
+ludus_filigran_opencti_DOCKER_OPENCTI: 7.260811.0
+ludus_filigran_opencti_DOCKER_OPENAEV: 3.260805.0
+ludus_filigran_opencti_DOCKER_XTM: 3.260728.0
+ludus_filigran_opencti_DOCKER_XTM_ONE: 1.260811.0
 
 ludus_filigran_opencti_INSTALL_DIR: /opt/filigram
 

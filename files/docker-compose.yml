@@ -438,13 +438,14 @@ services:
       elasticsearch:
         condition: service_healthy
     restart: always
+    # undef bug with  "http://openaev:8080/api/health?health_access_key=${OPENAEV_HEALTHCHECK_KEY}"
     healthcheck:
       test:
         [
           "CMD",
           "wget",
           "-qO-",
-          "http://openaev:8080/api/health?health_access_key=${OPENAEV_HEALTHCHECK_KEY}",
+          "http://openaev:8080/",
         ]
       interval: 10s
       timeout: 5s
