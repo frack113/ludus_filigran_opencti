@@ -106,7 +106,7 @@
     status_code:
       - 200
   until: uri_output.status == 200
-  retries: 24
-  delay: 5
+  retries: 36
+  delay: 10
   register: uri_output
   when: compose_result is defined and not compose_result.failed
