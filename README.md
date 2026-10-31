@@ -1,4 +1,4 @@
-# Ansible Role: OpenCTI/OpenBAS Server
+# Ansible Role: OpenCTI/OpenAEV Server
 
 An Ansible Role that installs [OpenCTI](https://docs.opencti.io/latest/) and [OpenAEV](https://docs.openaev.io/latest/) for [LUDUS](https://ludus.cloud/).
 
@@ -39,16 +39,17 @@ Available variables are listed below, along with default values (see `defaults/m
 # auto (docker if installed, else podman), docker, podman
 ludus_filigran_opencti_CONTAINER_ENGINE: auto
 
-ludus_filigran_opencti_DOCKER_OPENCTI: 7.260710.0
-ludus_filigran_opencti_DOCKER_OPENAEV: 2.260710.0
-ludus_filigran_opencti_DOCKER_XTM: 3.260707.0
-ludus_filigran_opencti_DOCKER_XTM_ONE: 1.260712.0
-ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.4
-ludus_filigran_opencti_DOCKER_REDIS: 8.8.0
-ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.16
+ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.7
+ludus_filigran_opencti_DOCKER_REDIS: 8.8.1
+ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.20
 ludus_filigran_opencti_DOCKER_POSTGRES: 17-alpine
 ludus_filigran_opencti_DOCKER_RUSTFS: 1.0.1
 ludus_filigran_opencti_DOCKER_RABBITMQ: 4.3-management
+
+ludus_filigran_opencti_DOCKER_OPENCTI: 7.260811.0
+ludus_filigran_opencti_DOCKER_OPENAEV: 3.260805.0
+ludus_filigran_opencti_DOCKER_XTM: 3.260728.0
+ludus_filigran_opencti_DOCKER_XTM_ONE: 1.260811.0
 
 ludus_filigran_opencti_INSTALL_DIR: /opt/filigram
 
@@ -80,15 +81,15 @@ ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@opencti.io'
 ludus_filigran_opencti_OPENCTI_ADMIN_PASSWORD: ChangeMePlease
 ludus_filigran_opencti_OPENCTI_ADMIN_TOKEN: 3f752a3b-b4b6-44d0-bb80-ff3807469164
 ludus_filigran_opencti_OPENCTI_HEALTHCHECK_ACCESS_KEY: 1b7f65f9-65c9-4391-93e0-5a92a4852c20
-ludus_filigran_opencti_OPENCTI_ENCRYPTION_KEY: ChangeMeWithGeneratedBase64Key
+ludus_filigran_opencti_OPENCTI_ENCRYPTION_KEY: AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=
 
 ludus_filigran_opencti_OPENAEV_ADMIN_EMAIL: 'admin@opencti.io'
 ludus_filigran_opencti_OPENAEV_ADMIN_PASSWORD: ChangeMePlease
 ludus_filigran_opencti_OPENAEV_ADMIN_TOKEN: 3f4dc0cf-eff8-4f6a-aec7-07e6566931ef
 ludus_filigran_opencti_OPENAEV_HEALTHCHECK_KEY: 1b7f65f9-65c9-4391-93e0-5a92a4852c20
 ludus_filigran_opencti_OPENAEV_MAIL_IMAP_ENABLED: false
-ludus_filigran_opencti_OPENAEV_ADMIN_ENCRYPTION_KEY: ChangeMeWithGeneratedBase64Key
-ludus_filigran_opencti_OPENAEV_ADMIN_ENCRYPTION_SALT: ChangeMeWithMin8Chars
+ludus_filigran_opencti_OPENAEV_ADMIN_ENCRYPTION_KEY: AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=
+ludus_filigran_opencti_OPENAEV_ADMIN_ENCRYPTION_SALT: ChangeMeMin8CharsSaltBase64
 ludus_filigran_opencti_OPENAEV_WITH_PROXY: false
 
 ludus_filigran_opencti_COLLECTOR_NVD_NIST_CVE_API_KEY: ''
@@ -97,6 +98,17 @@ ludus_filigran_opencti_INJECTOR_CALDERA_ENABLE: false
 ludus_filigran_opencti_INJECTOR_CALDERA_URL: http://caldera:8888
 ludus_filigran_opencti_INJECTOR_CALDERA_PUBLIC_URL: http://caldera:8888
 ludus_filigran_opencti_INJECTOR_CALDERA_API_KEY: Qb5-gN6hy2-iFNi2P0dvf_vE6-5zaq59YG4SQZQrpu4
+
+ludus_filigran_opencti_XTM_ONE_POSTGRES_USER: filigran
+ludus_filigran_opencti_XTM_ONE_POSTGRES_PASSWORD: ChangeMe
+ludus_filigran_opencti_PLATFORM_REGISTRATION_TOKEN: 3f752a3b-b4b6-44d0-bb80-ff3807469164
+ludus_filigran_opencti_XTM_ONE_ADMIN_EMAIL: 'admin@opencti.io'
+ludus_filigran_opencti_XTM_ONE_ADMIN_PASSWORD: ChangeMePlease
+ludus_filigran_opencti_XTM_ONE_SECRET_KEY: ChangeMeWithGeneratedBase64Key
+ludus_filigran_opencti_XTM_ONE_EXTERNAL_SCHEME: http
+ludus_filigran_opencti_XTM_ONE_HOST: localhost
+ludus_filigran_opencti_XTM_ONE_PORT: 4000
+ludus_filigran_opencti_XTM_ONE_S3_BUCKET: xtm-one-files
 ```
 
 ## Dependencies
@@ -106,6 +118,19 @@ Ansible :
 - community.docker (only used when the Docker engine is selected)
 
 ## Example Playbook
+
+```yaml
+- name: Deploy Filigran (OpenCTI + OpenAEV)
+  hosts: filigran
+  become: true
+  roles:
+    - frack113.ludus_filigran_opencti
+  vars:
+    # Force a specific engine if needed (default: auto)
+    # ludus_filigran_opencti_CONTAINER_ENGINE: podman
+    ludus_filigran_opencti_OPENCTI_ADMIN_EMAIL: 'admin@example.com'
+    ludus_filigran_opencti_OPENAEV_ADMIN_EMAIL: 'admin@example.com'
+```
 
 ## Example Ludus Range Config
 

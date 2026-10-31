@@ -4,7 +4,7 @@ dependencies: []
 galaxy_info:
   role_name: ludus_filigran_opencti
   author: frack113
-  description: An Ansible Role that install Filigran OpenCTI and OpenBAS on Linux
+  description: An Ansible Role that installs Filigran OpenCTI and OpenAEV on Linux
   company: freelance
   license: GPLv3
   min_ansible_version: "2.10"
