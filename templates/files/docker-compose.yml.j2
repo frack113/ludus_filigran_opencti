@@ -5,7 +5,7 @@ services:
 
   # Generate RSA key for xtm-composer (PKCS#8 format)
   rsa-key-generator:
-    image: alpine/openssl:${OPENSSL}
+    image: docker.io/alpine/openssl:${OPENSSL}
     volumes:
       - rsakeys:/keys
     entrypoint: ["/bin/ash"]
@@ -21,7 +21,7 @@ services:
       retries: 3
     restart: always
   redis:
-    image: redis:${REDIS}
+    image: docker.io/library/redis:${REDIS}
     restart: always
     ports:
       - "6379:6379"
@@ -66,7 +66,7 @@ services:
       timeout: 3s
       retries: 50
   pgsql:
-    image: postgres:${POSTGRES}
+    image: docker.io/library/postgres:${POSTGRES}
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -80,7 +80,7 @@ services:
       timeout: 5s
       retries: 5
   rustfs:
-    image: rustfs/rustfs:${RUSTFS}
+    image: docker.io/rustfs/rustfs:${RUSTFS}
     volumes:
       - s3data:/data
       - rustfslogs:/logs
@@ -97,7 +97,7 @@ services:
       timeout: 5s
       retries: 3
   rabbitmq:
-    image: rabbitmq:${RABBITMQ}
+    image: docker.io/library/rabbitmq:${RABBITMQ}
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
@@ -122,7 +122,7 @@ services:
   ###########################
 
   xtm-composer:
-    image: filigran/xtm-composer:${XTM}
+    image: docker.io/filigran/xtm-composer:${XTM}
     platform: linux/amd64
     environment:
       - MANAGER__ID=${XTM_COMPOSER_ID}
@@ -139,7 +139,17 @@ services:
       - OPENAEV__DAEMON__SELECTOR=docker
       - OPENAEV__DAEMON__DOCKER__NETWORK_MODE=${COMPOSE_PROJECT_NAME}_default
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      # Long syntax: podman-compose's short-mount parser does not
+      # understand the ':z' SELinux suffix, docker-compose accepts both.
+      # The ':z' relabel is required under SELinux: it labels the socket
+      # container_file_t, the only sock_file type a container may write to.
+      # (The matching connectto policy rule is installed by engine.yml
+      # as the filigran_podman SELinux module.)
+      - type: bind
+        source: {{ filigran_container_sock }}
+        target: /var/run/docker.sock
+        bind:
+          selinux: z
       - rsakeys:/keys:ro
     depends_on:
       rsa-key-generator:
@@ -155,7 +165,7 @@ services:
   ###########################
 
   opencti:
-    image: opencti/platform:${OPENCTI}
+    image: docker.io/opencti/platform:${OPENCTI}
     environment:
       - NODE_OPTIONS=--max-old-space-size=8096
       - APP__PORT=8080
@@ -212,7 +222,7 @@ services:
       timeout: 5s
       retries: 20
   worker:
-    image: opencti/worker:${OPENCTI}
+    image: docker.io/opencti/worker:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -229,7 +239,7 @@ services:
   ###########################
 
   connector-export-file-stix:
-    image: opencti/connector-export-file-stix:${OPENCTI}
+    image: docker.io/opencti/connector-export-file-stix:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -242,7 +252,7 @@ services:
       opencti:
         condition: service_healthy
   connector-export-file-csv:
-    image: opencti/connector-export-file-csv:${OPENCTI}
+    image: docker.io/opencti/connector-export-file-csv:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -255,7 +265,7 @@ services:
       opencti:
         condition: service_healthy
   connector-export-file-txt:
-    image: opencti/connector-export-file-txt:${OPENCTI}
+    image: docker.io/opencti/connector-export-file-txt:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -268,7 +278,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-file-stix:
-    image: opencti/connector-import-file-stix:${OPENCTI}
+    image: docker.io/opencti/connector-import-file-stix:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -283,7 +293,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-document:
-    image: opencti/connector-import-document:${OPENCTI}
+    image: docker.io/opencti/connector-import-document:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -300,7 +310,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-file-yara:
-    image: opencti/connector-import-file-yara:${OPENCTI}
+    image: docker.io/opencti/connector-import-file-yara:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -315,7 +325,7 @@ services:
       opencti:
         condition: service_healthy
   connector-analysis:
-    image: opencti/connector-import-document:${OPENCTI}
+    image: docker.io/opencti/connector-import-document:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -331,7 +341,7 @@ services:
       opencti:
         condition: service_healthy
   connector-import-external-reference:
-    image: opencti/connector-import-external-reference:${OPENCTI}
+    image: docker.io/opencti/connector-import-external-reference:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -347,7 +357,7 @@ services:
   ###########################
 
   connector-opencti:
-    image: opencti/connector-opencti:${OPENCTI}
+    image: docker.io/opencti/connector-opencti:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -361,7 +371,7 @@ services:
       opencti:
         condition: service_healthy
   connector-mitre:
-    image: opencti/connector-mitre:${OPENCTI}
+    image: docker.io/opencti/connector-mitre:${OPENCTI}
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -378,7 +388,7 @@ services:
   ###########################
 
   openaev:
-    image: openaev/platform:${OPENAEV}
+    image: docker.io/openaev/platform:${OPENAEV}
     environment:
       - OPENAEV_BASE-URL=${OPENAEV_EXTERNAL_SCHEME}://${OPENAEV_HOST}:${OPENAEV_PORT}
       - OPENAEV_AUTH-LOCAL-ENABLE=true
@@ -457,7 +467,7 @@ services:
   ###########################
 
   collector-mitre-attack:
-    image: openaev/collector-mitre-attack:${OPENAEV}
+    image: docker.io/openaev/collector-mitre-attack:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -468,7 +478,7 @@ services:
         condition: service_healthy
     restart: always
   collector-openaev:
-    image: openaev/collector-openaev:${OPENAEV}
+    image: docker.io/openaev/collector-openaev:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -479,7 +489,7 @@ services:
         condition: service_healthy
     restart: always
   collector-atomic-red-team:
-    image: openaev/collector-atomic-red-team:${OPENAEV}
+    image: docker.io/openaev/collector-atomic-red-team:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -490,7 +500,7 @@ services:
         condition: service_healthy
     restart: always
   collector-nvd-nist-cve:
-    image: openaev/collector-nvd-nist-cve:${OPENAEV}
+    image: docker.io/openaev/collector-nvd-nist-cve:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -507,7 +517,7 @@ services:
   ###########################
 
   pgsql-xtm-one:
-    image: pgvector/pgvector:pg17
+    image: docker.io/pgvector/pgvector:pg17
     environment:
       POSTGRES_USER: ${XTM_ONE_POSTGRES_USER}
       POSTGRES_PASSWORD: ${XTM_ONE_POSTGRES_PASSWORD}
@@ -522,7 +532,7 @@ services:
       retries: 5
 
   xtm-one:
-    image: xtmone/platform:${XTM_ONE}
+    image: docker.io/xtmone/platform:${XTM_ONE}
     environment:
       - PLATFORM_MODE=xtm_one
       - PLATFORM_REGISTRATION_TOKEN=${PLATFORM_REGISTRATION_TOKEN}
@@ -557,7 +567,7 @@ services:
       start_period: 60s
 
   xtm-one-worker:
-    image: xtmone/worker:${XTM_ONE}
+    image: docker.io/xtmone/worker:${XTM_ONE}
     environment:
       - PLATFORM_MODE=xtm_one
       - PLATFORM_REGISTRATION_TOKEN=${PLATFORM_REGISTRATION_TOKEN}
@@ -581,7 +591,7 @@ services:
   ###########################
 
   injector-nmap:
-    image: openaev/injector-nmap:${OPENAEV}
+    image: docker.io/openaev/injector-nmap:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}
@@ -592,7 +602,7 @@ services:
         condition: service_healthy
     restart: always
   injector-nuclei:
-    image: openaev/injector-nuclei:${OPENAEV}
+    image: docker.io/openaev/injector-nuclei:${OPENAEV}
     environment:
       - OPENAEV_URL=http://openaev:8080
       - OPENAEV_TOKEN=${OPENAEV_ADMIN_TOKEN}

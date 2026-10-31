@@ -1,0 +1,71 @@
+# tasks/core.yml
+---
+
+- name: Create installation directory if it doesn't exist
+  file:
+    path: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
+
+- name: Create .env file from template
+  ansible.builtin.template:
+    src: files/env.j2
+    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/.env"
+    mode: '0644'
+
+- name: Copy files from local 'files' directory to installation directory
+  copy:
+    src: "files/"
+    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/"
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
+    mode: '0644'
+
+- name: Set container engine socket path
+  ansible.builtin.set_fact:
+    filigran_container_sock: >-
+      {{ '/var/run/docker.sock' if filigran_container_engine == 'docker'
+         else '/run/podman/podman.sock' }}
+
+- name: Render docker-compose.yml for the resolved engine
+  ansible.builtin.template:
+    src: files/docker-compose.yml.j2
+    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/docker-compose.yml"
+    mode: '0644'
+
+# Define the list of images to pull (customize as needed)
+- name: Set list of Filigran images
+  set_fact:
+    # Fully qualified names: podman refuses unqualified short names
+    # in non-interactive mode, docker accepts both forms.
+    filigran_images:
+      - docker.io/alpine/openssl:{{ ludus_filigran_opencti_DOCKER_OPENSSL }}
+      - docker.io/library/redis:{{ ludus_filigran_opencti_DOCKER_REDIS }}
+      - docker.elastic.co/elasticsearch/elasticsearch:{{ ludus_filigran_opencti_DOCKER_ELASTIC }}
+      - docker.io/library/postgres:{{ ludus_filigran_opencti_DOCKER_POSTGRES }}
+      - docker.io/rustfs/rustfs:{{ ludus_filigran_opencti_DOCKER_RUSTFS }}
+      - docker.io/library/rabbitmq:{{ ludus_filigran_opencti_DOCKER_RABBITMQ }}
+      - docker.io/filigran/xtm-composer:{{ ludus_filigran_opencti_DOCKER_XTM }}
+      - docker.io/opencti/platform:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/worker:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-export-file-stix:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-export-file-csv:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-export-file-txt:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-import-file-stix:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-import-document:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-import-file-yara:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-import-external-reference:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-opencti:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/opencti/connector-mitre:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
+      - docker.io/openaev/platform:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/openaev/collector-mitre-attack:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/openaev/collector-openaev:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/openaev/collector-atomic-red-team:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/openaev/collector-nvd-nist-cve:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/openaev/injector-nmap:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/openaev/injector-nuclei:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
+      - docker.io/pgvector/pgvector:pg17
+      - docker.io/xtmone/platform:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
+      - docker.io/xtmone/worker:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}

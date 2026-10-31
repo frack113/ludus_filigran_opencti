@@ -1,69 +1,7 @@
-# tasks/filigram.yml 
+# tasks/filigram.yml
 ---
 
-- name: Install required packages (wget and curl)
-  ansible.builtin.package:
-    name:
-      - wget
-      - curl
-    state: present
-
-- name: Create installation directory if it doesn't exist
-  file:
-    path: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
-    state: directory
-    mode: '0755'
-    owner: "{{ ansible_user | default('root') }}"
-    group: "{{ ansible_user | default('root') }}"
-
-- name: Create .env file from template
-  ansible.builtin.template:
-    src: files/env.j2
-    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/.env"
-    mode: '0644'
-
-- name: Copy files from local 'files' directory to installation directory
-  copy:
-    src: "files/"
-    dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/"
-    owner: "{{ ansible_user | default('root') }}"
-    group: "{{ ansible_user | default('root') }}"
-    mode: '0644'
-
-# Define the list of images to pull (customize as needed)
-- name: Set list of Filigran images
-  set_fact:
-    filigran_images:
-      - alpine/openssl:{{ ludus_filigran_opencti_DOCKER_OPENSSL }}
-      - redis:{{ ludus_filigran_opencti_DOCKER_REDIS }}
-      - docker.elastic.co/elasticsearch/elasticsearch:{{ ludus_filigran_opencti_DOCKER_ELASTIC }}
-      - postgres:{{ ludus_filigran_opencti_DOCKER_POSTGRES }}
-      - rustfs/rustfs:{{ ludus_filigran_opencti_DOCKER_RUSTFS }}
-      - rabbitmq:{{ ludus_filigran_opencti_DOCKER_RABBITMQ }}
-      - filigran/xtm-composer:{{ ludus_filigran_opencti_DOCKER_XTM }}
-      - opencti/platform:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/worker:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-export-file-stix:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-export-file-csv:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-export-file-txt:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-import-file-stix:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-import-document:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-import-file-yara:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-import-external-reference:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-opencti:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - opencti/connector-mitre:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
-      - openaev/platform:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - openaev/collector-mitre-attack:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - openaev/collector-openaev:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - openaev/collector-atomic-red-team:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - openaev/collector-nvd-nist-cve:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - openaev/injector-nmap:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - openaev/injector-nuclei:{{ ludus_filigran_opencti_DOCKER_OPENAEV }}
-      - pgvector/pgvector:pg17
-      - xtmone/platform:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
-      - xtmone/worker:{{ ludus_filigran_opencti_DOCKER_XTM_ONE }}
-
-- name: Pull Filigran images individually (max 2 at a time)
+- name: Pull Filigran images individually (docker, max 2 at a time)
   community.docker.docker_image:
     name: "{{ item }}"
     source: pull
@@ -71,6 +9,34 @@
   throttle: 2
   ignore_errors: yes
   register: pull_results
+  when: filigran_container_engine == 'docker'
+
+- name: Check which Filigran images are already present (podman)
+  ansible.builtin.command:
+    argv: ["podman", "image", "exists", "{{ item }}"]
+  loop: "{{ filigran_images }}"
+  register: filigran_image_exists
+  failed_when: false
+  changed_when: false
+  when: filigran_container_engine == 'podman'
+
+- name: Set list of Filigran images to pull (podman)
+  ansible.builtin.set_fact:
+    filigran_images_to_pull: >-
+      {{ filigran_image_exists.results
+         | selectattr('rc', 'ne', 0)
+         | map(attribute='item')
+         | list }}
+  when: filigran_container_engine == 'podman'
+
+- name: Pull Filigran images individually (podman)
+  ansible.builtin.command:
+    argv: ["podman", "pull", "{{ item }}"]
+  loop: "{{ filigran_images_to_pull | default([]) }}"
+  register: pull_results
+  failed_when: false
+  changed_when: true
+  when: filigran_container_engine == 'podman'
 
 - name: Warning about failed image pulls
   debug:
@@ -80,7 +46,7 @@
   loop_control:
     label: "{{ item.item }}"
 
-- name: Start Filigran docker
+- name: Start Filigran stack (docker)
   community.docker.docker_compose_v2:
     project_src: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
     state: present
@@ -88,8 +54,16 @@
     wait_timeout: 240
     pull: missing
   register: compose_result
+  when: filigran_container_engine == 'docker'
 
-- name: Fail if Docker Compose failed to start services
+- name: Start Filigran stack (podman)
+  ansible.builtin.command:
+    chdir: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
+    argv: ["podman", "compose", "-f", "docker-compose.yml", "up", "-d"]
+  register: compose_result
+  when: filigran_container_engine == 'podman'
+
+- name: Fail if compose failed to start services
   meta: end_host
   when: compose_result is defined and compose_result.failed
 

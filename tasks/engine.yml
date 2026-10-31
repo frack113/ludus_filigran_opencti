@@ -1,0 +1,145 @@
+# tasks/engine.yml
+---
+
+- name: Probe installed container engines
+  ansible.builtin.command: which {{ item }}
+  register: engine_probe
+  loop: ['docker', 'podman']
+  failed_when: false
+  changed_when: false
+
+- name: Set installed container engine facts
+  ansible.builtin.set_fact:
+    filigran_docker_installed: "{{ engine_probe.results[0].rc == 0 }}"
+    filigran_podman_installed: "{{ engine_probe.results[1].rc == 0 }}"
+
+- name: Validate container engine value
+  ansible.builtin.assert:
+    that: ludus_filigran_opencti_CONTAINER_ENGINE in ['auto', 'docker', 'podman']
+    fail_msg: >-
+      ludus_filigran_opencti_CONTAINER_ENGINE must be 'auto', 'docker'
+      or 'podman' (got '{{ ludus_filigran_opencti_CONTAINER_ENGINE }}')
+
+- name: Fail on container engine conflict
+  ansible.builtin.fail:
+    msg: >-
+      Container engine conflict: an engine is already installed
+      (docker={{ filigran_docker_installed }},
+      podman={{ filigran_podman_installed }})
+      but '{{ ludus_filigran_opencti_CONTAINER_ENGINE }}' was requested.
+      Uninstall the other engine first, or set
+      ludus_filigran_opencti_CONTAINER_ENGINE to 'auto'
+      or to the already installed engine.
+  when:
+    - ludus_filigran_opencti_CONTAINER_ENGINE != 'auto'
+    - (
+        (ludus_filigran_opencti_CONTAINER_ENGINE == 'docker' and filigran_podman_installed)
+        or (ludus_filigran_opencti_CONTAINER_ENGINE == 'podman' and filigran_docker_installed)
+      )
+
+- name: Resolve container engine
+  ansible.builtin.set_fact:
+    filigran_container_engine: >-
+      {{ ludus_filigran_opencti_CONTAINER_ENGINE
+         if ludus_filigran_opencti_CONTAINER_ENGINE != 'auto'
+         else ('docker' if filigran_docker_installed
+               else 'podman') }}
+
+- name: Install container engine
+  block:
+    - name: Install Docker if not installed
+      ansible.builtin.package:
+        name: "{{ 'docker' if ansible_os_family == 'Debian' else 'docker-ce' }}"
+        state: present
+      when:
+        - filigran_container_engine == 'docker'
+        - not filigran_docker_installed
+
+    - name: Ensure Docker service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+      when: filigran_container_engine == 'docker'
+
+    - name: Install Podman if not installed
+      ansible.builtin.package:
+        name:
+          - podman
+          - podman-compose
+        state: present
+      when: filigran_container_engine == 'podman'
+
+    - name: Ensure Podman API socket is available
+      ansible.builtin.systemd:
+        name: podman.socket
+        state: started
+        enabled: true
+      when: filigran_container_engine == 'podman'
+
+    - name: Ensure Podman service is running (rootful)
+      ansible.builtin.service:
+        name: podman
+        state: started
+        enabled: true
+      when: filigran_container_engine == 'podman'
+
+    - name: Check SELinux status
+      ansible.builtin.command: getenforce
+      register: filigran_selinux_status
+      changed_when: false
+      when: filigran_container_engine == 'podman'
+
+    - name: Install SELinux tooling (checkmodule)
+      ansible.builtin.package:
+        name: checkpolicy
+        state: present
+      when:
+        - filigran_container_engine == 'podman'
+        - filigran_selinux_status.stdout != 'Disabled'
+
+    - name: Check whether the filigran_podman SELinux module is loaded
+      ansible.builtin.command: semodule -l
+      register: filigran_semodule_list
+      changed_when: false
+      when:
+        - filigran_container_engine == 'podman'
+        - filigran_selinux_status.stdout != 'Disabled'
+
+    - name: Ship the filigran_podman SELinux module source
+      ansible.builtin.copy:
+        src: filigran_podman.te
+        dest: /tmp/filigran_podman.te
+        mode: "0644"
+      when:
+        - filigran_container_engine == 'podman'
+        - filigran_selinux_status.stdout != 'Disabled'
+        - "'filigran_podman' not in filigran_semodule_list.stdout"
+
+    - name: Compile the SELinux module to CIL
+      ansible.builtin.command:
+        argv:
+          - checkmodule
+          - -m
+          - -C
+          - -o
+          - /tmp/filigran_podman.cil
+          - /tmp/filigran_podman.te
+      when:
+        - filigran_container_engine == 'podman'
+        - filigran_selinux_status.stdout != 'Disabled'
+        - "'filigran_podman' not in filigran_semodule_list.stdout"
+
+    - name: Load the filigran_podman SELinux module
+      ansible.builtin.command: semodule -i /tmp/filigran_podman.cil
+      when:
+        - filigran_container_engine == 'podman'
+        - filigran_selinux_status.stdout != 'Disabled'
+        - "'filigran_podman' not in filigran_semodule_list.stdout"
+
+- name: Install required packages (wget and curl)
+  ansible.builtin.package:
+    name:
+      - wget
+      - curl
+    state: present
