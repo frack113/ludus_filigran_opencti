@@ -92,7 +92,7 @@ services:
       RUSTFS_ROOT_PASSWORD: ${RUSTFS_ROOT_PASSWORD}
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/ready || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
