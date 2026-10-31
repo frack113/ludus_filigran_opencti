@@ -2,17 +2,17 @@
 # Container engine: auto (docker if installed, else podman), docker, podman
 ludus_filigran_opencti_CONTAINER_ENGINE: auto
 
-ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.7
-ludus_filigran_opencti_DOCKER_REDIS: 8.8.1
-ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.20
+ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.9
+ludus_filigran_opencti_DOCKER_REDIS: 8.8.4
+ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.23
 ludus_filigran_opencti_DOCKER_POSTGRES: 17-alpine
-ludus_filigran_opencti_DOCKER_RUSTFS: 1.0.1
-ludus_filigran_opencti_DOCKER_RABBITMQ: 4.3-management
+ludus_filigran_opencti_DOCKER_RUSTFS: 1.0.4
+ludus_filigran_opencti_DOCKER_RABBITMQ: 4.4-management
 
-ludus_filigran_opencti_DOCKER_OPENCTI: 7.260811.0
-ludus_filigran_opencti_DOCKER_OPENAEV: 3.260805.0
-ludus_filigran_opencti_DOCKER_XTM: 3.260728.0
-ludus_filigran_opencti_DOCKER_XTM_ONE: 1.260811.0
+ludus_filigran_opencti_DOCKER_OPENCTI: 7.261030.1
+ludus_filigran_opencti_DOCKER_OPENAEV: 3.261029.0
+ludus_filigran_opencti_DOCKER_XTM: 3.261021.1
+ludus_filigran_opencti_DOCKER_XTM_ONE: 1.261030.0
 
 ludus_filigran_opencti_INSTALL_DIR: /opt/filigram
 
