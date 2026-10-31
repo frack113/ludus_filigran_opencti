@@ -14,7 +14,7 @@
 
     - name: Install Docker if not installed
       ansible.builtin.package:
-        name: docker
+        name: "{{ 'docker' if ansible_os_family == 'Debian' else 'docker-ce' }}"
         state: present
       when: docker_installed.rc != 0
 

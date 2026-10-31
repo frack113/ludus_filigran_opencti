@@ -79,19 +79,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  minio:
-    image: minio/minio:${MINIO}
+  rustfs:
+    image: rustfs/rustfs:${RUSTFS}
     volumes:
       - s3data:/data
+      - rustfslogs:/logs
     ports:
       - "9000:9000"
+      - "9001:9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    command: server /data
+      RUSTFS_ROOT_USER: ${RUSTFS_ROOT_USER}
+      RUSTFS_ROOT_PASSWORD: ${RUSTFS_ROOT_PASSWORD}
     restart: always
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/ready || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -168,11 +169,11 @@ services:
       - REDIS__PORT=6379
       - ELASTICSEARCH__URL=http://elasticsearch:9200
       - ELASTICSEARCH__NUMBER_OF_REPLICAS=0
-      - MINIO__ENDPOINT=minio
+      - MINIO__ENDPOINT=rustfs
       - MINIO__PORT=9000
       - MINIO__USE_SSL=false
-      - MINIO__ACCESS_KEY=${MINIO_ROOT_USER}
-      - MINIO__SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO__ACCESS_KEY=${RUSTFS_ROOT_USER}
+      - MINIO__SECRET_KEY=${RUSTFS_ROOT_PASSWORD}
       - RABBITMQ__HOSTNAME=rabbitmq
       - RABBITMQ__PORT=5672
       - RABBITMQ__PORT_MANAGEMENT=15672
@@ -194,7 +195,7 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
-      minio:
+      rustfs:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -388,9 +389,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://pgsql:5432/openaev
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - MINIO_ENDPOINT=minio
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
-      - MINIO_ACCESS_SECRET=${MINIO_ROOT_PASSWORD}
+      - MINIO_ENDPOINT=rustfs
+      - MINIO_ACCESS_KEY=${RUSTFS_ROOT_USER}
+      - MINIO_ACCESS_SECRET=${RUSTFS_ROOT_PASSWORD}
       - OPENAEV_RABBITMQ_HOSTNAME=rabbitmq
       - OPENAEV_RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
       - OPENAEV_RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
@@ -431,7 +432,7 @@ services:
     depends_on:
       pgsql:
         condition: service_healthy
-      minio:
+      rustfs:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -532,9 +533,9 @@ services:
       - SECRET_KEY=${XTM_ONE_SECRET_KEY}
       - DATABASE_URL=postgresql+asyncpg://${XTM_ONE_POSTGRES_USER}:${XTM_ONE_POSTGRES_PASSWORD}@pgsql-xtm-one:5432/xtm_one
       - REDIS_URL=redis://redis:6379
-      - S3_ENDPOINT=minio:9000
-      - S3_ACCESS_KEY=${MINIO_ROOT_USER}
-      - S3_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - S3_ENDPOINT=rustfs:9000
+      - S3_ACCESS_KEY=${RUSTFS_ROOT_USER}
+      - S3_SECRET_KEY=${RUSTFS_ROOT_PASSWORD}
       - S3_BUCKET=${XTM_ONE_S3_BUCKET:-xtm-one-files}
       - S3_USE_SSL=false
       - OPENAEV_API_URL=http://openaev:8080
@@ -545,7 +546,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
+      rustfs:
         condition: service_healthy
     restart: always
     healthcheck:
@@ -565,9 +566,9 @@ services:
       - SECRET_KEY=${XTM_ONE_SECRET_KEY}
       - DATABASE_URL=postgresql+asyncpg://${XTM_ONE_POSTGRES_USER}:${XTM_ONE_POSTGRES_PASSWORD}@pgsql-xtm-one:5432/xtm_one
       - REDIS_URL=redis://redis:6379
-      - S3_ENDPOINT=minio:9000
-      - S3_ACCESS_KEY=${MINIO_ROOT_USER}
-      - S3_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - S3_ENDPOINT=rustfs:9000
+      - S3_ACCESS_KEY=${RUSTFS_ROOT_USER}
+      - S3_SECRET_KEY=${RUSTFS_ROOT_PASSWORD}
       - S3_BUCKET=${XTM_ONE_S3_BUCKET:-xtm-one-files}
       - S3_USE_SSL=false
     depends_on:
@@ -609,4 +610,5 @@ volumes:
   redisdata:
   amqpdata:
   rsakeys:
+  rustfslogs:
   pgsqlxtmonedata:

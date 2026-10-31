@@ -2,20 +2,19 @@
 ---
 
 - name: Install required packages (wget and curl)
-  apt:
+  ansible.builtin.package:
     name:
       - wget
       - curl
     state: present
-  when: ansible_os_family == 'Debian'
 
 - name: Create installation directory if it doesn't exist
   file:
     path: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
     state: directory
     mode: '0755'
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
 
 - name: Create .env file from template
   ansible.builtin.template:
@@ -27,8 +26,8 @@
   copy:
     src: "files/"
     dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
     mode: '0644'
 
 # Define the list of images to pull (customize as needed)
@@ -39,7 +38,7 @@
       - redis:{{ ludus_filigran_opencti_DOCKER_REDIS }}
       - docker.elastic.co/elasticsearch/elasticsearch:{{ ludus_filigran_opencti_DOCKER_ELASTIC }}
       - postgres:{{ ludus_filigran_opencti_DOCKER_POSTGRES }}
-      - minio/minio:{{ ludus_filigran_opencti_DOCKER_MINIO }}
+      - rustfs/rustfs:{{ ludus_filigran_opencti_DOCKER_RUSTFS }}
       - rabbitmq:{{ ludus_filigran_opencti_DOCKER_RABBITMQ }}
       - filigran/xtm-composer:{{ ludus_filigran_opencti_DOCKER_XTM }}
       - opencti/platform:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
@@ -94,6 +93,11 @@
   meta: end_host
   when: compose_result is defined and compose_result.failed
 
+- name: Install python3-requests (uri module dependency)
+  ansible.builtin.package:
+    name: python3-requests
+    state: present
+
 - name: Wait until Filigran HTTP status is 200
   uri:
     url: 'http://localhost:8080/'
@@ -102,7 +106,7 @@
     status_code:
       - 200
   until: uri_output.status == 200
-  retries: 24
-  delay: 5
+  retries: 36
+  delay: 10
   register: uri_output
   when: compose_result is defined and not compose_result.failed

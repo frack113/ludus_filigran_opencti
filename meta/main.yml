@@ -14,6 +14,7 @@ galaxy_info:
     # This example includes a lot, see https://github.com/ansible/ansible-lint/blob/main/src/ansiblelint/schemas/meta.json for all possibilities
     - name: Debian
     - name: Ubuntu
+    - name: RedHat
   galaxy_tags:
     - ludus
     - opencti
