@@ -2,20 +2,19 @@
 ---
 
 - name: Install required packages (wget and curl)
-  apt:
+  ansible.builtin.package:
     name:
       - wget
       - curl
     state: present
-  when: ansible_os_family == 'Debian'
 
 - name: Create installation directory if it doesn't exist
   file:
     path: "{{ ludus_filigran_opencti_INSTALL_DIR }}"
     state: directory
     mode: '0755'
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
 
 - name: Create .env file from template
   ansible.builtin.template:
@@ -27,8 +26,8 @@
   copy:
     src: "files/"
     dest: "{{ ludus_filigran_opencti_INSTALL_DIR }}/"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
     mode: '0644'
 
 # Define the list of images to pull (customize as needed)
@@ -93,6 +92,11 @@
 - name: Fail if Docker Compose failed to start services
   meta: end_host
   when: compose_result is defined and compose_result.failed
+
+- name: Install python3-requests (uri module dependency)
+  ansible.builtin.package:
+    name: python3-requests
+    state: present
 
 - name: Wait until Filigran HTTP status is 200
   uri:
