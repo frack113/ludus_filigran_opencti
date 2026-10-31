@@ -1,4 +1,7 @@
 ---
+# Container engine: auto (docker if installed, else podman), docker, podman
+ludus_filigran_opencti_CONTAINER_ENGINE: auto
+
 ludus_filigran_opencti_DOCKER_OPENSSL: 3.5.7
 ludus_filigran_opencti_DOCKER_REDIS: 8.8.1
 ludus_filigran_opencti_DOCKER_ELASTIC: 8.19.20

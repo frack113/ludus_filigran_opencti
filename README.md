@@ -11,12 +11,34 @@ Use the [XTM Docker Deployment](https://github.com/FiligranHQ/xtm-docker)
 
 - Linux server
 - Internet connection
+- A container engine: Docker or Podman. With the default
+  `ludus_filigran_opencti_CONTAINER_ENGINE: auto`, the role uses Docker if it
+  is already installed, otherwise it installs and uses Podman.
+
+  ⚠️ Podman note: on Podman the role installs `podman` and
+  `podman-compose` (EPEL) and drives the stack with
+  `podman compose -f docker-compose.yml up -d` against the rootful
+  API socket (`/run/podman/podman.sock`).
+
+  ⚠️ SELinux note (Podman only): under SELinux Enforcing, a container
+  cannot reach the podman API socket with the stock policy —
+  `container_t` has no `connectto` permission on the runtime domain
+  (`container_runtime_t`) that owns the socket. The role therefore
+  installs a minimal local policy module (`filigran_podman`, shipped in
+  `files/filigran_podman.te`, compiled with `checkmodule -m -C` and
+  loaded with `semodule -i`) granting exactly that one rule. The
+  compose file mounts the socket with the `:z` relabel, which labels it
+  `container_file_t` — the sock_file type a container may write to.
+  Both pieces are required; skip neither.
 
 ## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
+# auto (docker if installed, else podman), docker, podman
+ludus_filigran_opencti_CONTAINER_ENGINE: auto
+
 ludus_filigran_opencti_DOCKER_OPENCTI: 7.260710.0
 ludus_filigran_opencti_DOCKER_OPENAEV: 2.260710.0
 ludus_filigran_opencti_DOCKER_XTM: 3.260707.0
@@ -81,8 +103,7 @@ ludus_filigran_opencti_INJECTOR_CALDERA_API_KEY: Qb5-gN6hy2-iFNi2P0dvf_vE6-5zaq5
 
 Ansible :
 
-- community.docker
-- geerlingguy.docker
+- community.docker (only used when the Docker engine is selected)
 
 ## Example Playbook
 

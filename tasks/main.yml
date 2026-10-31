@@ -1,44 +1,21 @@
 ---
 # 
-# Install OpenCTI And OpenBAS
+# Install OpenCTI And OpenAEV
 # 
 
-# https://github.com/badsectorlabs/ludus_elastic_container/blob/c5955df6806074b3d74c24f3ce6a6a02f1c21eb2/tasks/main.yml
-- name: Ensure Docker is installed
-  block:
-    - name: Check if Docker is installed
-      ansible.builtin.command: which docker
-      register: docker_installed
-      ignore_errors: true
-      changed_when: false
+#
+# The install flow is a plain sequence of includes without `when`:
+# in ansible-core 2.16, a `when` on include_tasks is evaluated in the
+# included task context, where variables registered by parent tasks
+# are not visible, which makes such conditions unreliable.
+- name: Install container engine and dependencies
+  ansible.builtin.include_tasks:
+    file: engine.yml
 
-    - name: Install Docker if not installed
-      ansible.builtin.package:
-        name: "{{ 'docker' if ansible_os_family == 'Debian' else 'docker-ce' }}"
-        state: present
-      when: docker_installed.rc != 0
+- name: Create installation directory and copy files
+  ansible.builtin.include_tasks:
+    file: core.yml
 
-    - name: Ensure Docker service is running
-      ansible.builtin.service:
-        name: docker
-        state: started
-        enabled: true
-
-
-- name: Check that .finish exists
-  stat:
-    path: "/opt/filigram.finish"
-  register: filigram_result
-
-- name: install OpenCTI and OpenAEV
-  block:
-    - name: Install OpenCTI
-      ansible.builtin.include_tasks:
-        file: filigram.yml
-    
-    - name: Touch the .finish file
-      ansible.builtin.file:
-        path: "/opt/filigram.finish"
-        state: touch
-  when: not filigram_result.stat.exists
-
+- name: Pull images and start the stack
+  ansible.builtin.include_tasks:
+    file: filigram.yml

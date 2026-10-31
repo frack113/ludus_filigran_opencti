@@ -1,6 +1,5 @@
 ---
-dependencies:
-  - role: geerlingguy.docker
+dependencies: []
 
 galaxy_info:
   role_name: ludus_filigran_opencti

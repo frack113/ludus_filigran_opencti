@@ -1,0 +1,23 @@
+module filigran_podman 1.0;
+
+require {
+	type container_t;
+	type container_runtime_t;
+	class unix_stream_socket { connectto };
+}
+
+# Allow containers (e.g. the XTM composer / OpenAEV orchestrator, which
+# talks to the runtime through /var/run/docker.sock) to connect to the
+# podman runtime socket.
+#
+# The reference policy only lets container_t connect to gssproxy_t,
+# sssd_t and container_t itself - a container can never reach the
+# podman service socket (owned by container_runtime_t). This is a
+# genuine upstream policy gap, so a small local module fills it.
+#
+# Note: only the connectto rule is needed here. The socket FILE label
+# is handled by the ':z' bind option in docker-compose.yml, which
+# relabels it container_file_t (the sock_file type container_t may
+# write to). The socket's security context is bound to the podman
+# service domain at bind() time and cannot be changed from the file.
+allow container_t container_runtime_t:unix_stream_socket connectto;
