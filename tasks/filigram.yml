@@ -39,7 +39,7 @@
       - redis:{{ ludus_filigran_opencti_DOCKER_REDIS }}
       - docker.elastic.co/elasticsearch/elasticsearch:{{ ludus_filigran_opencti_DOCKER_ELASTIC }}
       - postgres:{{ ludus_filigran_opencti_DOCKER_POSTGRES }}
-      - minio/minio:{{ ludus_filigran_opencti_DOCKER_MINIO }}
+      - rustfs/rustfs:{{ ludus_filigran_opencti_DOCKER_RUSTFS }}
       - rabbitmq:{{ ludus_filigran_opencti_DOCKER_RABBITMQ }}
       - filigran/xtm-composer:{{ ludus_filigran_opencti_DOCKER_XTM }}
       - opencti/platform:{{ ludus_filigran_opencti_DOCKER_OPENCTI }}
