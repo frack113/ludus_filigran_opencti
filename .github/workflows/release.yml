@@ -29,7 +29,9 @@ jobs:
       - name: Set up Python 3.
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          # Pinned: 3.15 breaks the latest ansible-core at import time
+          # (AttributeError: module 'dataclasses' has no attribute '_is_type')
+          python-version: '3.14'
 
       - name: Install Ansible.
         run: pip3 install ansible-core
